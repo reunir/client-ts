@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'Inter';
+  src: local('Inter'),
+    url('../fonts/Inter/Inter-Regular.ttf') format('truetype');
+  font-weight: 500;
+}
+
+#root {
+  display: grid;
+  width: 100vw;
+  user-select: none;
+  height: 100vh;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+    'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+#chat-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.header {
+  animation: headerfocusout 0.5s 3s forwards;
+}
+.meetnavOut {
+  animation: meetNavOut 0.5s 3s forwards;
+}
+/* peer-hover/bottomNav:animate-meetnav */
+@keyframes headerfocusout {
+  0% {
+    top: 0px;
+  }
+  100% {
+    top: -80px;
+  }
+}
+@keyframes meetNavOut {
+  0% {
+    height: 70px;
+  }
+  100% {
+    height: 0px;
+  }
+}
+
+.visualizers {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-5%, -5%);
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  border-top: 30px solid #fff !important;
+  z-index: 1;
+  border-top: 20px solid transparent;
+  border-left: 20px solid transparent;
+  transform-origin: top left;
+  transition: 0.25s;
+}
