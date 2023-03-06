@@ -17,9 +17,11 @@ const formDefaultData: SignupObject = {
   lastName: '',
   email: '',
   password: '',
+  phone: '',
   seed: '',
   stripe: '',
   backgroundColor: '',
+  isEmailVerified: false,
 };
 
 const signupContextDefaultValues: signupContextType = {
@@ -38,22 +40,18 @@ export const SignupContext = createContext<signupContextType>(
 SignupContext.displayName = 'SignupContext';
 
 function SignupProvider(props: AppProp) {
-  const partTitles = [
-    'Your Profile',
-    'Verification Process',
-    'Voice and Face Verification',
-  ];
+  const partTitles = ['Your Profile', 'Accept terms and conditions'];
   const [formData, setFormData] = useState<SignupObject>(formDefaultData);
   const [whichPart, setwhichPart] = useState<number>(0);
   const [partTitle, setPartTitle] = useState<string>(partTitles[whichPart]);
   const [percentageCompleted, setpercentageCompleted] = useState<number>(
-    Math.floor((whichPart / 3) * 100)
+    Math.floor((whichPart / 2) * 100)
   );
   const [isNextDisabled, setisNextDisabled] = useState<boolean>(true);
   const updatePart = (part: number) => {
     setwhichPart(part);
     setPartTitle(partTitles[part]);
-    setpercentageCompleted(Math.floor((part / 3) * 100));
+    setpercentageCompleted(Math.floor((part / 2) * 100));
   };
   const updateFormData = (updatedObject: ModifiedSignupObject) => {
     setFormData({ ...formData, ...updatedObject });

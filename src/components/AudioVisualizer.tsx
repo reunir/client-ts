@@ -1,10 +1,14 @@
-import React, { useEffect, useRef } from 'react';
+import React, { createRef, useEffect, useRef } from 'react';
 import Avatar from './Avatar';
 
 export default function AudioVisualizer({
   stream,
+  className,
+  audioTrack,
 }: {
   stream: MediaStream | null;
+  className?: string | null;
+  audioTrack: boolean;
 }) {
   const analyserCanvas = useRef<HTMLDivElement>(null);
   function removeDivAfter(this: HTMLSpanElement) {
@@ -12,14 +16,18 @@ export default function AudioVisualizer({
       this.remove();
     }, 3000);
   }
+  const audioRef = createRef<HTMLAudioElement>();
   useEffect(() => {
+    if (stream && audioRef.current && !audioRef.current.srcObject) {
+      console.log('Here hu!');
+      audioRef.current.srcObject = stream;
+    }
     if (stream) {
       const audioCtx = new AudioContext();
       const analyser = audioCtx.createAnalyser();
       analyser.fftSize = 64;
       const audioSrc = audioCtx.createMediaStreamSource(stream);
       audioSrc.connect(analyser);
-      audioSrc.connect(audioCtx.destination);
       const bufferLength = analyser.frequencyBinCount;
       let data = new Uint8Array(bufferLength);
       let elements: HTMLSpanElement[] = [];
@@ -30,20 +38,6 @@ export default function AudioVisualizer({
         elements.push(element);
         analyserCanvas.current?.appendChild(element);
       }
-      //   const ctx = analyserCanvas.current.getContext('2d');
-      //   const draw = (dataParm: any) => {
-      //     dataParm = [...dataParm];
-      //     ctx.fillStyle = 'blue'; //white background
-      //     ctx.lineWidth = 2; //width of candle/bar
-      //     ctx.strokeStyle = '#d5d4d5'; //color of candle/bar
-      //     const space = analyserCanvas.current.width / dataParm.length;
-      //     dataParm.forEach((value: number, i: number) => {
-      //       ctx.beginPath();
-      //       ctx.moveTo(space * i, analyserCanvas.current.height); //x,y
-      //       ctx.lineTo(space * i, analyserCanvas.current.height - value); //x,y
-      //       ctx.stroke();
-      //     });
-      //   };
       const clamp = (num: number, min: number, max: number) => {
         if (num >= max) return max;
         if (num <= min) return min;
@@ -62,11 +56,14 @@ export default function AudioVisualizer({
       };
       requestAnimationFrame(loopingFunction);
     }
-  }, []);
+    return () => {
+      console.log('Dismounted visualizer!');
+    };
+  }, [stream]);
   return (
     <div
       ref={analyserCanvas}
-      className="grid w-[250px] h-[250px] place-self-center relative rotate-180"
+      className={`w-[250px] h-[250px] place-self-center relative rotate-180 ${className}`}
     >
       <Avatar className="grid rotate-180 absolute top-0 left-0 z-[2] rounded-full w-[250px] h-[250px] overflow-hidden" />
     </div>

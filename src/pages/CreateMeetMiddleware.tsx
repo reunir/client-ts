@@ -1,26 +1,29 @@
 import { useEffect } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { useLocation, useOutletContext, useParams } from 'react-router-dom';
+import { useAuth } from '../context/auth-context';
 import { SOCKETEVENTS, SOCKETREQUEST } from '../types/Socket';
-
-export default function MeetMiddleware() {
+export default function CreateMeetMiddleware() {
   const {
-    SOCKETREQUEST,
     sendSocketRequest,
     meetId,
     isSocketConnected,
     setMeetId,
+    encryptedhash,
   } = useOutletContext<any>();
+  const { user } = useAuth();
+  const location = useLocation();
   useEffect(() => {
-    const meetCreate: SOCKETREQUEST = {
-      ...SOCKETREQUEST,
-      data: {
-        meetId,
-      },
-    };
-    if (isSocketConnected) {
-      sendSocketRequest(SOCKETEVENTS.CREATE, meetCreate);
+    if (user && isSocketConnected) {
+      const meetObject = location.state;
+      const createData: SOCKETREQUEST = {
+        userId: user.id,
+        type: meetObject.type,
+        data: null,
+        meetId: meetObject.meetId,
+      };
+      sendSocketRequest(SOCKETEVENTS.CREATE, createData);
     }
-  });
+  }, [user, isSocketConnected]);
   return (
     <div className="grid w-screen h-screen place-content-center dark:bg-gray-700 bg-gray-300">
       <svg

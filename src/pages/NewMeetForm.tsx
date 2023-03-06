@@ -1,16 +1,59 @@
-import { useEffect, useState } from 'react';
+import { createRef, useEffect, useState } from 'react';
 import NormalButton from '../components/Buttons/NormalButton';
 import FormInfo from '../components/FormInfo';
-
-export default function NewMeetForm() {
+import {
+  useLinkClickHandler,
+  useNavigate,
+  useOutletContext,
+} from 'react-router-dom';
+import { SOCKETEVENTS, SOCKETREQUEST } from '../types/Socket';
+import { generate } from 'randomstring';
+export default function NewMeetForm({
+  sendSocketRequest,
+  isSocketConnected,
+}: {
+  sendSocketRequest: (event: SOCKETEVENTS, data: SOCKETREQUEST) => void;
+  isSocketConnected: boolean;
+}) {
   const [typeSelected, setTypeSelected] = useState('');
   const [meetCode, setMeetCode] = useState('');
+  const startMeetRef = createRef<HTMLButtonElement>();
+  useEffect(() => {
+    startMeetRef.current?.setAttribute('disabled', 'true');
+  });
   useEffect(() => {
     console.log(typeSelected);
+    if (typeSelected === '') {
+      startMeetRef.current?.setAttribute('disabled', 'true');
+    } else {
+      startMeetRef.current?.removeAttribute('disabled');
+    }
   }, [typeSelected]);
+  const randomGenerate = (len: number): string => {
+    return generate({
+      length: len,
+      charset: 'alphabetic',
+      capitalization: 'lowercase',
+    });
+  };
   const { setButtonLoading, Button } = NormalButton();
+  const { user } = useOutletContext<any>();
+  const navigate = useNavigate();
   const { setButtonLoading: setjoinButtonLoading, Button: JoinButton } =
     NormalButton();
+  const createMeeting = () => {
+    console.log('Here');
+
+    const meetId =
+      randomGenerate(3) + '-' + randomGenerate(4) + '-' + randomGenerate(3);
+    const meetData = {
+      meetId,
+      type: typeSelected,
+    };
+    navigate(`/meet/__create/`, {
+      state: meetData,
+    });
+  };
   return (
     <div className="grid">
       <div className="grid grid-rows-[1fr_5fr] w-[75%] rounded h-[80%] place-self-center">
@@ -92,7 +135,9 @@ export default function NewMeetForm() {
             </div>
             <div className="grid">
               <Button
-                className="grid place-content-center rounded-sm border border-gray-500 place-self-center text-white px-[30px] py-[10px] bg-[#2EA44E] hover:bg-[#148633]"
+                myRef={startMeetRef}
+                onClick={createMeeting}
+                className="grid place-content-center rounded-sm border border-gray-500 place-self-center text-white px-[30px] py-[10px] disabled:bg-gray-400 disabled:cursor-not-allowed disabled:border-gray-200 bg-[#2EA44E] hover:bg-[#148633]"
                 text="Start meeting"
               />
             </div>

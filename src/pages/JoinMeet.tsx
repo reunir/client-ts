@@ -1,4 +1,5 @@
 import { Lottie } from '@crello/react-lottie';
+import { useOutletContext } from 'react-router-dom';
 import joinMeet from '../assets/joinanim.json';
 import Avatar from '../components/Avatar';
 import DateTime from './DateTime';
@@ -12,6 +13,7 @@ export default function JoinMeet() {
       preserveAspectRatio: 'xMidYMid slice',
     },
   };
+  const { isSocketConnected, sendSocketRequest } = useOutletContext<any>();
   return (
     <div className="grid h-screen w-screen bg-slate-100 grid-rows-[1fr_11fr]">
       <div className="grid grid-cols-[4fr_5fr_4fr] shadow">
@@ -28,7 +30,10 @@ export default function JoinMeet() {
         </div>
       </div>
       <div className="grid grid-cols-[1fr_1.5fr]">
-        <NewMeetForm />
+        <NewMeetForm
+          isSocketConnected={isSocketConnected}
+          sendSocketRequest={sendSocketRequest}
+        />
         <div className="grid content-center justify-end">
           <Lottie
             config={defaultOptions}

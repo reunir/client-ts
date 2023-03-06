@@ -1,11 +1,24 @@
-import { useEffect, useState } from 'react';
+import { createRef, useEffect, useState } from 'react';
 import { useSignup } from '../../context/signup-context';
 import ClipLoader from 'react-spinners/ClipLoader';
 import parse from 'html-react-parser';
 import { useForm } from 'react-hook-form';
 import { generateNewAvatar } from '../../utils/generateAvatar';
 import FormInfo from '../../components/FormInfo';
-import { ModifiedSignupObject } from '../../types';
+import {
+  LoginBody,
+  METHOD,
+  ModifiedSignupObject,
+  ResponseType,
+  TEMPLATETYPE,
+} from '../../types';
+import makeRequest from '../../utils/requestWrap';
+import NormalButton from '../../components/Buttons/NormalButton';
+import { useOutletContext } from 'react-router-dom';
+
+type OTPI = {
+  encodedURI: string;
+};
 
 export default function YourProfile() {
   const { formData, whichPart, updateFormData, isNextDisabled, updatePart } =
@@ -13,12 +26,19 @@ export default function YourProfile() {
   const [avatarLoader, setAvatarLoader] = useState(false);
   const [avatar, setAvatar] = useState('');
   const [showPassword, setshowPassword] = useState(false);
-
+  const { Button, setButtonLoading } = NormalButton();
+  const { Button: SendOTPButton, setButtonLoading: sendOTPButtonLoading } =
+    NormalButton();
+  const [otpURI, setOtpURI] = useState('');
+  const [userOtp, setUserOtp] = useState('');
+  const { addError } = useOutletContext<any>();
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
+
+  const nextButtonRef = createRef<HTMLButtonElement>();
 
   const avatarCallback = () => {
     setAvatarLoader(true);
@@ -31,14 +51,98 @@ export default function YourProfile() {
   useEffect(() => {
     avatarCallback();
   }, []);
+
+  useEffect(() => {
+    if (!formData.isEmailVerified) {
+      nextButtonRef.current?.setAttribute('disabled', 'true');
+    } else {
+      nextButtonRef.current?.removeAttribute('disabled');
+    }
+  }, [isNextDisabled, formData.isEmailVerified]);
+
   const formSubmit = (data: ModifiedSignupObject, e: any) => {
     e.preventDefault();
+    if (isNextDisabled) {
+      addError({
+        success: false,
+        message: 'Fill up required fields!',
+      });
+      return;
+    }
+    if (!formData.isEmailVerified) {
+      addError({
+        success: false,
+        message: 'Please verify your email!',
+      });
+      return;
+    }
     updatePart(1);
   };
   const onError = (errors: any, e: any) => {
     e.preventDefault();
     console.log(errors);
   };
+
+  const verifyEmail = (email: string): boolean => {
+    if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email))
+      return true;
+    return false;
+  };
+
+  const verifyOTP = (): boolean => {
+    if (userOtp.length != 6 || !/^\d+$/.test(userOtp)) return false;
+    return true;
+  };
+
+  const sendOTPRequest = async () => {
+    setOtpURI('');
+    const {
+      response,
+      displaySuccessMessage,
+    }: {
+      response: ResponseType<OTPI> | null;
+      displaySuccessMessage: () => void;
+    } = await makeRequest(
+      METHOD.POST,
+      'auth/verifyemail',
+      {
+        email: formData.email,
+        type: TEMPLATETYPE.VERIFY,
+      },
+      addError,
+      setButtonLoading
+    );
+    displaySuccessMessage();
+    if (response.data) {
+      setOtpURI(response.data?.body.encodedURI);
+    }
+  };
+
+  const verifyUserOTP = async () => {
+    const {
+      response,
+      displaySuccessMessage,
+    }: {
+      response: ResponseType<OTPI> | null;
+      displaySuccessMessage: () => void;
+    } = await makeRequest(
+      METHOD.POST,
+      'auth/verifyOTP',
+      {
+        otpURI: otpURI,
+        otp: userOtp,
+        check: formData.email,
+      },
+      addError,
+      sendOTPButtonLoading
+    );
+    displaySuccessMessage();
+    if (response.success) {
+      updateFormData({ isEmailVerified: true });
+      setOtpURI('');
+    }
+  };
+
   return (
     <>
       <div className="grid mx-[20px] mb-[20px]">
@@ -137,6 +241,7 @@ export default function YourProfile() {
             <div className="grid grid-cols-[1fr_auto]">
               <input
                 type="email"
+                disabled={formData.isEmailVerified}
                 id="email"
                 {...register('email', {
                   required: true,
@@ -144,15 +249,66 @@ export default function YourProfile() {
                 placeholder="johndoe@gmail.com"
                 value={formData.email}
                 onChange={(e) => {
-                  updateFormData({ email: e.target.value });
+                  if (!formData.isEmailVerified)
+                    updateFormData({ email: e.target.value });
                 }}
                 spellCheck={false}
                 className={`text-sm  rounded-md border bg-[#F9FAFB] outline-[#1C64F2] p-[10px] ${
                   errors.email ? 'border-red-700' : ''
                 }`}
               />
+              {formData.isEmailVerified ? (
+                ''
+              ) : (
+                <div className="w-[80px] grid place-content-center ">
+                  <Button
+                    onClick={sendOTPRequest}
+                    disabled={!verifyEmail(formData.email)}
+                    text="Verify"
+                    className={`w-fit h-fit ${
+                      verifyEmail(formData.email)
+                        ? 'text-purple-500 cursor-pointer'
+                        : 'text-gray-400 cursor-not-allowed'
+                    }`}
+                  />
+                </div>
+              )}
             </div>
           </div>
+          {otpURI != '' ? (
+            <div className="grid grid-rows-[auto_1fr] gap-[7px] mb-[10px]">
+              <div className="grid grid-cols-[auto_1fr] gap-[5px] text-gray-700 font-bold text-sm">
+                Enter OTP
+              </div>
+              <div className="grid grid-cols-[auto_1fr]">
+                <input
+                  type="text"
+                  id="otp"
+                  placeholder="XXXXXX"
+                  value={userOtp}
+                  onChange={(e) => {
+                    setUserOtp(e.target.value);
+                  }}
+                  spellCheck={false}
+                  className={`text-sm w-[100px] text-center rounded-md border bg-[#F9FAFB] outline-[#1C64F2] p-[10px]`}
+                />
+                <div className="w-[80px] grid place-content-center ">
+                  <SendOTPButton
+                    onClick={verifyUserOTP}
+                    disabled={!verifyOTP()}
+                    text="Verify"
+                    className={`w-fit h-fit ${
+                      verifyOTP()
+                        ? 'text-green-500 cursor-pointer'
+                        : 'text-gray-400 cursor-not-allowed'
+                    }`}
+                  />
+                </div>
+              </div>
+            </div>
+          ) : (
+            ''
+          )}
           {/* <div className="grid grid-rows-[auto_1fr] gap-[7px] mb-[10px]">
                 <div className="grid grid-cols-[auto_1fr] gap-[5px] text-gray-700 font-bold text-sm">
                     Phone Number
@@ -208,6 +364,7 @@ export default function YourProfile() {
         </div>
         <div className="grid grid-flow-col mx-[20px] mb-[20px]">
           <button
+            ref={nextButtonRef}
             disabled={isNextDisabled}
             className={`grid cursor-pointer disabled:bg-[#698dd4] disabled:cursor-default hover:bg-[#1654cf] place-self-end font-extrabold px-[40px] place-content-center py-[10px] text-white bg-[#1C64F2] w-[120px] rounded-md ${
               whichPart === 3 ? 'hidden' : ''

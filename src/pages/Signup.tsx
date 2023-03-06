@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { useSignup } from '../context/signup-context';
 import SignupHelper from './Signup/SignupHelper';
 
@@ -16,7 +17,7 @@ export default function Signup() {
         <div className="grid grid-flow-row lg:grid-flow-col mx-[20px] my-[20px] border-b-2">
           <div className="grid place-self-start lg:pb-[12px]">
             <div className="grid font-semibold text-sm text-gray-400">
-              STEP: {whichPart + 1} of 3
+              STEP: {whichPart + 1} of 2
             </div>
             <div className="font-bold text-lg">{partTitle}</div>
           </div>

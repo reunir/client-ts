@@ -26,7 +26,17 @@ async function requestWrap<T>(method: METHOD, url: string, data: Object | {}, ad
                 await axios.post(url, data)
             ).data;
         }
-    } catch (error) {
+    } catch (error: any) {
+        if (error.code === axios.AxiosError.ERR_NETWORK) {
+            apiError.code = 503;
+            apiError.data = null;
+            apiError.error = {
+                message: 'Cannot connect to server!',
+                statusCode: 503
+            };
+            apiError.success = false;
+            return apiError;
+        }
         if (axios.isAxiosError(error)) {
             apiError.code = error.response?.data.code;
             apiError.data = error.response?.data.data;

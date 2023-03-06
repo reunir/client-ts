@@ -1,4 +1,8 @@
-import { Camera, CameraOff } from '@styled-icons/fluentui-system-filled';
+import {
+  Camera,
+  CameraOff,
+  ShareScreenStart,
+} from '@styled-icons/fluentui-system-filled';
 import { Mic, MicOff } from '@styled-icons/ionicons-sharp';
 
 export default function MeetControls({
@@ -8,6 +12,7 @@ export default function MeetControls({
   audioTrack,
   toggleAudio,
   toggleCamera,
+  enableStream,
 }: {
   className: string;
   setIsMeetNavShown: any;
@@ -15,6 +20,7 @@ export default function MeetControls({
   audioTrack: boolean;
   toggleCamera: () => void;
   toggleAudio: () => void;
+  enableStream: () => Promise<void>;
 }) {
   const headerFocusOut = (e: React.BaseSyntheticEvent) => {
     e.currentTarget.classList.add('meetnavOut');
@@ -32,7 +38,7 @@ export default function MeetControls({
     >
       <div></div>
       <div className="grid place-content-center">
-        <div className="grid grid-cols-[auto_auto_auto] gap-[10px]">
+        <div className="grid grid-cols-[auto_auto_auto_auto] gap-[10px]">
           <button
             onClick={toggleAudio}
             className={`grid cursor-pointer place-content-center place-self-center w-[50px] h-[50px] rounded-full ${
@@ -57,6 +63,12 @@ export default function MeetControls({
             } `}
           >
             {!videoTrack ? <CameraOff width={30} /> : <Camera width={30} />}
+          </button>
+          <button
+            onClick={enableStream}
+            className="grid cursor-pointer place-content-center place-self-center w-[50px] h-[50px] rounded-full bg-red-700 hover:bg-red-800 text-white"
+          >
+            {<ShareScreenStart width={30} />}
           </button>
         </div>
       </div>

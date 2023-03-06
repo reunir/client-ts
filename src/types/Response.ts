@@ -1,4 +1,4 @@
-interface dataInterface<T> {
+export interface dataInterface<T> {
     body: T,
     message: string
     statusCode: number
@@ -12,7 +12,7 @@ type ErrorTimeout = {
     arrayIndex: number
 }
 
-interface errorInterface {
+export interface errorInterface {
     message: string,
     statusCode: number
 }

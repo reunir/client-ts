@@ -11,7 +11,8 @@ import useUIMode from './hooks/setMode';
 import MeetOutlet from './pages/MeetOutlet';
 import Global from './components/Global';
 import JoinMeet from './pages/JoinMeet';
-import MeetMiddleware from './pages/MeetMiddleware';
+import CreateMeetMiddleware from './pages/CreateMeetMiddleware';
+import JoinMeetMiddleware from './pages/JoinMeetMiddleware';
 
 const Signup = React.lazy(() => import('./pages/Signup'));
 const Login = React.lazy(() => import('./pages/Login'));
@@ -56,9 +57,14 @@ function App() {
             <Route path="/signup" element={<Redirect />} />
             <Route path="/meet" element={<JoinMeet />} />
             <Route element={<MeetOutlet />}>
-              <Route path="/meet/__join/:id" element={<MeetMiddleware />} />
+              <Route
+                path="/meet/__create/"
+                element={<CreateMeetMiddleware />}
+              />
+              <Route path="/meet/__join" element={<JoinMeetMiddleware />} />
               <Route path="/meet/:id" element={<Meet />} />
             </Route>
+            <Route path="/" element={<Redirect />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>

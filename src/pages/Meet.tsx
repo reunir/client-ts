@@ -1,27 +1,67 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import React, { createRef, useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
+import AudioVisualizer from '../components/AudioVisualizer';
 import Camera from '../components/Camera';
 import Header from '../components/Header';
 import MeetControls from '../components/MeetControls';
+import Pinned from '../components/PinnedStream';
+import ScreenShare from '../components/ScreenShare';
+import Unpinned from '../components/UnpinnedStream';
 import { useAuth } from '../context/auth-context';
+import useMeetHooks from '../hooks/meetHooks';
+import useScreenCapture from '../hooks/screenCapture';
 import { useUserMedia } from '../hooks/userStream';
-import { CAPTURE_OPTIONS } from '../types';
-import MeetOutlet from './MeetOutlet';
+import { CAPTURE_OPTIONS, SCREEN_CAPTURE_OPTIONS } from '../types';
 
 export default function Meet() {
   const [isHeaderShown, setIsHeaderShown] = useState<boolean>(false);
   const [isMeetNavShown, setIsMeetNavShown] = useState<boolean>(false);
-  const videoRenderRef = useRef<HTMLDivElement>(null);
-  const { mediaStream, videoTrack, audioTrack, toggleAudio, toggleCamera } =
-    useUserMedia(CAPTURE_OPTIONS);
+  const videoRenderRef = createRef<HTMLDivElement>();
   const { user } = useAuth();
-  const { addError, addNotification } = useOutletContext<any>();
+  const {
+    setIsThisMeetVerified,
+    meetId,
+    meetData,
+    addNewUserStream,
+    getAMedia,
+    updateSelfStream,
+    addError,
+    addNotification,
+  } = useOutletContext<any>();
+  const {
+    mediaStream,
+    videoTrack,
+    audioTrack,
+    toggleAudio,
+    toggleCamera,
+    screenStream,
+    streamTrack,
+    enableStream,
+    pinnedStream,
+    unpinnedStreams,
+  } = useMeetHooks(meetData, addNewUserStream, getAMedia, updateSelfStream);
+  const location = useLocation();
+  const navigate = useNavigate();
+
   useEffect(() => {
-    addError({ status: false, error: { message: 'Temporary Error!' } });
-    addNotification({ message: 'This is sample message!' });
+    // addError({ status: false, error: { message: 'Temporary Error!' } });
+    // addNotification({ message: 'This is sample message!' });
+    if (location.state) {
+      if (location.state.meetVerified) setIsThisMeetVerified(true);
+      else {
+        navigate(`/meet/__join/`, {
+          state: { meetId },
+        });
+      }
+    } else {
+      console.log('Not set!');
+      navigate(`/meet/__join/`, {
+        state: { meetId },
+      });
+    }
   }, []);
   return (
-    <div className="w-screen h-screen grid fixed bg-slate-300">
+    <div className="w-screen h-screen grid bg-slate-300">
       <div
         id="headerHelper"
         className={`w-full max-h-fit ${
@@ -33,15 +73,11 @@ export default function Meet() {
         isHeaderShown={isHeaderShown}
         setIsHeaderShown={setIsHeaderShown}
       />
-      <div
-        ref={videoRenderRef}
-        className="w-[98%] h-[97%] place-self-center grid"
-      >
-        <Camera
-          mediaStream={mediaStream}
-          videoTrack={videoTrack}
-          videoRenderRef={videoRenderRef}
-        />
+      <div className="grid w-full">
+        <div className="m-[10px] w-[calc(100%-20px)] grid grid-cols-[1fr_auto]">
+          <Pinned pinnedStream={pinnedStream} />
+          <Unpinned unpinnedStream={unpinnedStreams} />
+        </div>
       </div>
       <div
         className={`w-full max-h-fit ${
@@ -50,6 +86,7 @@ export default function Meet() {
       ></div>
       <MeetControls
         toggleAudio={toggleAudio}
+        enableStream={enableStream}
         toggleCamera={toggleCamera}
         audioTrack={audioTrack}
         videoTrack={videoTrack}

@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { axiosExternal } from '../axiosDefault';
 
 const sprites = [
@@ -15,7 +14,7 @@ const sprites = [
 const getColorCode = () => {
     var makeColorCode = '0123456789ABCDEFabcdef';
     var code = '';
-    for (var count = 0; count < 8; count++) {
+    for (var count = 0; count < 6; count++) {
         code = code + makeColorCode[Math.floor(Math.random() * 16)];
     }
     return code;
@@ -38,4 +37,9 @@ const setUserAvatar = async (stripe: string, seed: string, backgroundColor: stri
     const avtr = await axiosExternal.get(`https://avatars.dicebear.com/api/${stripe}/${seed}.svg?background=%23${backgroundColor}`)
     sessionStorage.setItem(window.btoa("reunir-user-avatar"), avtr.data);
 }
-export { generateNewAvatar, getUserAvatar, setUserAvatar, generateAndReturnAvatar }
+
+const clearSession = () => {
+    sessionStorage.removeItem(window.btoa("reunir-user-avatar"))
+}
+
+export { generateNewAvatar, getUserAvatar, setUserAvatar, generateAndReturnAvatar, clearSession }

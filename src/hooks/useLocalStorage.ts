@@ -3,7 +3,7 @@ import { setLocalStorage, getLocalStorage } from '../utils';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { ResponseType } from '../types';
-import { setUserAvatar } from '../utils/generateAvatar';
+import { clearSession, setUserAvatar } from '../utils/generateAvatar';
 
 export function useLocalStorage(key: string, initialValue: string | null) {
     const [token, setToken] = useState<string | null>(() => {
@@ -20,11 +20,18 @@ export function useLocalStorage(key: string, initialValue: string | null) {
     });
     const [storedUser, setStoredUser] = useState<userType>(null);
     const getUserData = async () => {
-        const userData: ResponseType<userType> = await (await axios.get('auth/me')).data
-        if (userData.success && userData.data) {
-            setStoredUser(userData.data.body);
-            if (userData.data.body)
-                setUserAvatar(userData.data.body.stripe, userData.data.body.seed, userData.data.body.backgroundColor);
+        try {
+            const userData: ResponseType<userType> = await (await axios.get('auth/me')).data
+            if (userData.success && userData.data) {
+                setStoredUser(userData.data.body);
+                if (userData.data.body)
+                    setUserAvatar(userData.data.body.stripe, userData.data.body.seed, userData.data.body.backgroundColor);
+            }
+        } catch (err) {
+            if (axios.isAxiosError(err)) {
+                setUser(null)
+                clearSession()
+            }
         }
     }
     const setUser = (value: string | null): void => {

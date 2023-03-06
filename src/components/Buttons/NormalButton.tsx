@@ -7,13 +7,22 @@ export default function NormalButton() {
     className,
     text,
     onClick,
+    disabled,
+    myRef,
   }: {
     className: string;
     text: string;
     onClick?: (...props: any) => any;
+    disabled?: boolean;
+    myRef?: React.RefObject<HTMLButtonElement>;
   }) {
     return (
-      <button className={className} onClick={onClick}>
+      <button
+        ref={myRef}
+        disabled={disabled}
+        className={className}
+        onClick={onClick}
+      >
         {loading ? (
           <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
             <circle
@@ -22,7 +31,7 @@ export default function NormalButton() {
               cy="12"
               r="10"
               stroke="currentColor"
-              stroke-width="4"
+              strokeWidth="4"
             ></circle>
             <path
               className="opacity-75"

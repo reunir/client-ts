@@ -15,7 +15,17 @@ export type StreamOptions = {
     video: boolean;
 }
 
+export const SCREEN_CAPTURE_OPTIONS: StreamOptions = {
+    audio: false,
+    video: true
+}
+
 export const CAPTURE_OPTIONS: StreamOptions = {
     audio: true,
     video: true,
 };
+
+export enum TEMPLATETYPE {
+    VERIFY = 'VERIFY',
+    FORGET = 'FORGET'
+}

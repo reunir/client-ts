@@ -9,35 +9,52 @@ export default function Camera({
   videoRenderRef,
   mediaStream,
   videoTrack,
+  audioTrack,
 }: {
   videoRenderRef: React.RefObject<HTMLDivElement>;
   mediaStream: MediaStream | null;
   videoTrack: boolean;
+  audioTrack: boolean;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const parentRef = useRef<HTMLDivElement>(null);
   const [windowSize, setWindowSize] = useState([0, 0]);
-
-  if (mediaStream && videoRef.current && !videoRef.current.srcObject) {
-    videoRef.current.srcObject = mediaStream;
+  const [initialRender, setInitialRender] = useState(false);
+  function cameraDismount() {
+    if (videoRef.current && videoRef.current.srcObject) {
+      videoRef.current.srcObject = null;
+    }
   }
+
   function handleCanPlay() {
     if (videoRef.current) {
       videoRef.current.play();
     }
   }
+  function stopPlay() {
+    if (videoRef.current) {
+      videoRef.current.pause();
+    }
+  }
+
   useEffect(() => {
     if (videoRenderRef.current) {
-      setWindowSize([
-        videoRenderRef.current?.clientWidth,
-        videoRenderRef.current?.clientHeight,
-      ]);
+      const boundingRect = videoRenderRef.current.getBoundingClientRect();
+      const { width, height } = boundingRect;
+      setWindowSize([Math.round(width), Math.round(height)]);
     }
-  }, [
-    videoRenderRef.current?.clientWidth,
-    videoRenderRef.current?.clientHeight,
-  ]);
+  }, [videoRenderRef, initialRender]);
 
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.muted = true;
+    }
+  });
+  useEffect(() => {
+    if (mediaStream && videoRef.current && !videoRef.current.srcObject) {
+      videoRef.current.srcObject = mediaStream;
+      setInitialRender(true);
+    }
+  });
   return (
     <div
       className={`grid relative self-center`}
@@ -55,17 +72,18 @@ export default function Camera({
           height: windowSize[1] + 'px',
         }}
       >
-        {videoTrack ? (
+        {videoTrack &&
+        mediaStream?.getTracks().find((track) => track.kind === 'video')
+          ?.enabled ? (
           <video
             className={`-scale-x-100 -top-[1px] h-full -left-[1px] pointer-events-none`}
             ref={videoRef}
             onCanPlay={handleCanPlay}
             autoPlay
             playsInline
-            muted
           />
         ) : (
-          <AudioVisualizer stream={mediaStream} />
+          <AudioVisualizer audioTrack={audioTrack} stream={mediaStream} />
         )}
       </div>
     </div>
