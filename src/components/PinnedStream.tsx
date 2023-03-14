@@ -20,6 +20,7 @@ export default function Pinned({
                 videoTrack={pinnedStream.userStream.videoTrack}
                 audioTrack={pinnedStream.userStream.audioTrack}
                 videoRenderRef={videoRenderRef}
+                id={pinnedStream.userStream.id}
               />
             </div>
           ) : (

@@ -1,32 +1,31 @@
 import React, { createRef, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
-import AudioVisualizer from '../components/AudioVisualizer';
-import Camera from '../components/Camera';
 import Header from '../components/Header';
 import MeetControls from '../components/MeetControls';
 import Pinned from '../components/PinnedStream';
-import ScreenShare from '../components/ScreenShare';
 import Unpinned from '../components/UnpinnedStream';
 import { useAuth } from '../context/auth-context';
 import useMeetHooks from '../hooks/meetHooks';
-import useScreenCapture from '../hooks/screenCapture';
-import { useUserMedia } from '../hooks/userStream';
-import { CAPTURE_OPTIONS, SCREEN_CAPTURE_OPTIONS } from '../types';
+import { SOCKETEVENTS, SOCKETREQUEST } from '../types/Socket';
 
 export default function Meet() {
   const [isHeaderShown, setIsHeaderShown] = useState<boolean>(false);
   const [isMeetNavShown, setIsMeetNavShown] = useState<boolean>(false);
-  const videoRenderRef = createRef<HTMLDivElement>();
   const { user } = useAuth();
   const {
     setIsThisMeetVerified,
     meetId,
     meetData,
+    streams,
+    setMeetData,
     addNewUserStream,
+    addNewScreenMedia,
     getAMedia,
     updateSelfStream,
     addError,
     addNotification,
+    sendSocketRequest,
+    peerId,
   } = useOutletContext<any>();
   const {
     mediaStream,
@@ -39,7 +38,14 @@ export default function Meet() {
     enableStream,
     pinnedStream,
     unpinnedStreams,
-  } = useMeetHooks(meetData, addNewUserStream, getAMedia, updateSelfStream);
+  } = useMeetHooks(
+    meetData,
+    streams,
+    addNewUserStream,
+    addNewScreenMedia,
+    getAMedia,
+    updateSelfStream
+  );
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -47,8 +53,9 @@ export default function Meet() {
     // addError({ status: false, error: { message: 'Temporary Error!' } });
     // addNotification({ message: 'This is sample message!' });
     if (location.state) {
-      if (location.state.meetVerified) setIsThisMeetVerified(true);
-      else {
+      if (location.state.meetVerified) {
+        setIsThisMeetVerified(true);
+      } else {
         navigate(`/meet/__join/`, {
           state: { meetId },
         });
@@ -60,6 +67,20 @@ export default function Meet() {
       });
     }
   }, []);
+  useEffect(() => {
+    if (mediaStream) {
+      if (user) {
+        const req: SOCKETREQUEST = {
+          userId: user.id,
+          meetId: meetId,
+          type: '',
+          data: '',
+          peerId: peerId,
+        };
+        sendSocketRequest(SOCKETEVENTS.JOIN_ROOM, req);
+      }
+    }
+  }, [mediaStream]);
   return (
     <div className="w-screen h-screen grid bg-slate-300">
       <div
@@ -74,7 +95,11 @@ export default function Meet() {
         setIsHeaderShown={setIsHeaderShown}
       />
       <div className="grid w-full">
-        <div className="m-[10px] w-[calc(100%-20px)] grid grid-cols-[1fr_auto]">
+        <div
+          className={`m-[10px] w-[calc(100%-20px)] grid gap-[20px] ${
+            unpinnedStreams ? 'grid-cols-[auto_1fr]' : 'grid-cols-[1fr_auto]'
+          }`}
+        >
           <Pinned pinnedStream={pinnedStream} />
           <Unpinned unpinnedStream={unpinnedStreams} />
         </div>

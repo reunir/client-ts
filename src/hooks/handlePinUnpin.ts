@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { MEETDATA, PINNEDSTREAM, SCREENMEDIA, UNPINNEDSTREAMS, USERSTREAM, WHICHSTREAM } from '../types';
+import { MEETDATA, PINNEDSTREAM, SCREENMEDIA, STREAMS, UNPINNEDSTREAMS, USERSTREAM, WHICHSTREAM } from '../types';
 
-export default function useHandlePinUnpin(meetData: MEETDATA | null) {
+export default function useHandlePinUnpin(meetData: STREAMS) {
   const [pinnedStream, setPinnedStream] = useState<
     null | PINNEDSTREAM
   >(null);
@@ -47,18 +47,19 @@ export default function useHandlePinUnpin(meetData: MEETDATA | null) {
     }
   };
   const updatePinnedAndUnpinnedStreams = () => {
-    let pinnedStream: USERSTREAM | SCREENMEDIA;
     if (meetData) {
       if (meetData.screenMedias) {
-        // preference set to screen sharing
         meetData.screenMedias.forEach(updatePinUnpinScreen);
-      } else if (meetData.userStreams) {
+      }
+      if (meetData.userStreams) {
         meetData.userStreams.forEach(updatePinUnpinUser);
       }
     }
   };
   useEffect(() => {
-    updatePinnedAndUnpinnedStreams();
+    if (meetData) {
+      updatePinnedAndUnpinnedStreams();
+    }
   }, [meetData]);
   return {
     pinnedStream,

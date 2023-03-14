@@ -10,11 +10,13 @@ export default function Camera({
   mediaStream,
   videoTrack,
   audioTrack,
+  id,
 }: {
   videoRenderRef: React.RefObject<HTMLDivElement>;
   mediaStream: MediaStream | null;
   videoTrack: boolean;
   audioTrack: boolean;
+  id: string;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [windowSize, setWindowSize] = useState([0, 0]);
@@ -72,19 +74,31 @@ export default function Camera({
           height: windowSize[1] + 'px',
         }}
       >
-        {videoTrack &&
-        mediaStream?.getTracks().find((track) => track.kind === 'video')
-          ?.enabled ? (
-          <video
-            className={`-scale-x-100 -top-[1px] h-full -left-[1px] pointer-events-none`}
-            ref={videoRef}
-            onCanPlay={handleCanPlay}
-            autoPlay
-            playsInline
-          />
-        ) : (
-          <AudioVisualizer audioTrack={audioTrack} stream={mediaStream} />
-        )}
+        <video
+          className={`-scale-x-100 -top-[1px] ${
+            videoTrack &&
+            mediaStream?.getTracks().find((track) => track.kind === 'video')
+              ?.enabled
+              ? 'block'
+              : 'hidden'
+          } h-full -left-[1px] pointer-events-none`}
+          ref={videoRef}
+          id={id + '-video'}
+          onCanPlay={handleCanPlay}
+          autoPlay
+          playsInline
+        />
+        <AudioVisualizer
+          className={
+            videoTrack &&
+            mediaStream?.getTracks().find((track) => track.kind === 'video')
+              ?.enabled
+              ? 'hidden'
+              : 'block'
+          }
+          audioTrack={audioTrack}
+          stream={mediaStream}
+        />
       </div>
     </div>
   );

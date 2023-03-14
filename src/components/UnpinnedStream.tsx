@@ -14,14 +14,15 @@ export default function Unpinned({
     <div className="grid grid-flow-row">
       {unpinnedStream ? (
         unpinnedStream.userStreams ? (
-          unpinnedStream.userStreams.map((userStream) =>
+          unpinnedStream.userStreams.map((userStream, key) =>
             userStream ? (
-              <div ref={videoRenderRef} className="grid">
+              <div ref={videoRenderRef} key={key} className="grid">
                 <Camera
                   mediaStream={userStream.stream}
                   videoTrack={userStream.videoTrack}
                   audioTrack={userStream.audioTrack}
                   videoRenderRef={videoRenderRef}
+                  id={userStream.id}
                 />
               </div>
             ) : (

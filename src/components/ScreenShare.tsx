@@ -17,7 +17,7 @@ export default function ScreenShare({
     }
   }, [screenStream]);
   return streamTrack ? (
-    <div className="grid w-[700px]">
+    <div className="grid w-[1080px] content-center">
       <video autoPlay playsInline ref={videoRef}></video>
     </div>
   ) : (

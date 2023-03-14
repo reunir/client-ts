@@ -19,10 +19,11 @@ const Login = React.lazy(() => import('./pages/Login'));
 const Redirect = React.lazy(() => import('./pages/Redirect'));
 function App() {
   const { token, getUserData, user } = useAuth();
-  setAxiosDefault();
   useUIMode();
   useEffect(() => {
+    setAxiosDefault();
     if (token) {
+      console.log(token);
       setToken(token);
       getUserData();
     }

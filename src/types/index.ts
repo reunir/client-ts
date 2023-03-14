@@ -4,3 +4,4 @@ export * from './Request';
 export * from './Response';
 export * from './Objects';
 export * from './Notification';
+export * from './Peer';

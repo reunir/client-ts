@@ -16,7 +16,7 @@ export default function JoinMeetMiddleware() {
         data: null,
         meetId: meetObject.meetId,
       };
-      sendSocketRequest(SOCKETEVENTS.JOIN_ROOM, joinData);
+      sendSocketRequest(SOCKETEVENTS.VERIFY, joinData);
     }
   }, [user, isSocketConnected]);
   return <div></div>;

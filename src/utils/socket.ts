@@ -1,10 +1,13 @@
-import { io } from "socket.io-client";
-
+import { io, Socket } from "socket.io-client";
+import { DefaultEventsMap } from "@socket.io/component-emitter";
+let socket: Socket<DefaultEventsMap, DefaultEventsMap> | null = null;
 const connectSocket = () => {
-    const socket = io('http://localhost:8001/', {
-        // withCredentials: true,
-        transports: ["websocket"]
-    })
+    if (socket == null) {
+        socket = io('http://localhost:8001/socketio', {
+            // withCredentials: true,
+            transports: ["websocket"],
+        })
+    }
     return socket;
 }
 export default connectSocket;

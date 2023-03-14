@@ -50,11 +50,16 @@ export type MEETDATA = {
     participants: {
         length: number,
         userIds: string[]
-    }
+    },
+    type: string,
+    meetId: string,
+    admin: string,
+}
+
+export type STREAMS = {
     screenMedias: null | SCREENMEDIAS;
     userStreams: null | USERSTREAMS;
 }
-
 export type ModifiedSignupObject = {
     firstName?: string;
     lastName?: string;

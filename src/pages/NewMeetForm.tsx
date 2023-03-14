@@ -22,7 +22,6 @@ export default function NewMeetForm({
     startMeetRef.current?.setAttribute('disabled', 'true');
   });
   useEffect(() => {
-    console.log(typeSelected);
     if (typeSelected === '') {
       startMeetRef.current?.setAttribute('disabled', 'true');
     } else {
@@ -42,8 +41,6 @@ export default function NewMeetForm({
   const { setButtonLoading: setjoinButtonLoading, Button: JoinButton } =
     NormalButton();
   const createMeeting = () => {
-    console.log('Here');
-
     const meetId =
       randomGenerate(3) + '-' + randomGenerate(4) + '-' + randomGenerate(3);
     const meetData = {

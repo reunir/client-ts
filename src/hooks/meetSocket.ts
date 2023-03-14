@@ -1,16 +1,25 @@
 import io, { Socket } from "socket.io-client";
 import React, { useState, useEffect } from 'react';
-import connectSocket from "../utils/socket";
+import utilSocket from "../utils/socket";
 import { SOCKETEVENTS, SOCKETREQUEST, SOCKETRESPONSE } from "../types/Socket";
 import { DefaultEventsMap } from "@socket.io/component-emitter";
 import { useNavigate } from "react-router-dom";
 import useMeetData from "./meetData";
+import Peer, { DataConnection, MediaConnection } from "peerjs";
+import { PeerDataType, SCREENMEDIA, USERSTREAM } from "../types";
+import { useAuth } from "../context/auth-context";
 
-export default function useMeetSocket(addNotification: any, addError: any) {
+export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEventsMap>, addNotification: any, addError: any, peerId: string) {
     const [isSocketConnected, setIsConnected] = useState(false);
-    const { meetData, addNewScreenMedia, addNewUserStream, deleteScreenMedia, deleteUserStream, getAMedia, updateSelfStream } = useMeetData();
-    const [socket, setSocket] = useState<any>(null);
+    const [myPeer, setMyPeer] = useState<Peer>(new Peer(peerId, {
+        host: 'localhost',
+        port: 9000,
+        path: '/',
+    }))
+
+    const { meetData, streams, addNewScreenMedia, setMeetData, addNewUserStream, deleteScreenMedia, deleteUserStream, getAMedia, updateSelfStream, clearPinnedStreams } = useMeetData();
     const navigate = useNavigate();
+    const { user } = useAuth();
     function listenEvents(socket: Socket<DefaultEventsMap, DefaultEventsMap>) {
         socket.on(SOCKETEVENTS.SUCCESSFULL_CREATE, (args: SOCKETRESPONSE<any>) => {
             console.log(args)
@@ -26,35 +35,131 @@ export default function useMeetSocket(addNotification: any, addError: any) {
                 }
             })
         })
-        socket.on(SOCKETEVENTS.USER_JOINED, (args: SOCKETRESPONSE<any>) => {
-            console.log(args);
-            addNotification({ message: args.data?.message });
+        socket.on(SOCKETEVENTS.SUCCESSFULL_JOIN, (args: SOCKETRESPONSE<any>) => {
+            const meetDetails = args.data?.body.meetDetails
+            setMeetData({
+                participants: {
+                    length: meetDetails.participantCount,
+                    userIds: meetDetails.participants
+                },
+                meetId: meetDetails.meetId,
+                type: meetDetails.type,
+                admin: meetDetails.admin
+            })
+            console.log('Meeting data set');
         })
+        socket.on(SOCKETEVENTS.RECEIVE_STREAM_TYPE, (args: SOCKETRESPONSE<any>) => { // recently joined user
+            console.log(args)
+            const req: SOCKETREQUEST = {
+                data: {
+                    ack: true,
+                    peerId: myPeer.id,
+                    to: args.data?.body.socketId
+                },
+                meetId: '',
+                userId: '',
+                type: ''
+            }
+            socket.emit(SOCKETEVENTS.SEND_ACK, req)
+            myPeer.on("call", (call) => {
+                const videoElem = document.getElementById('self-video') as HTMLVideoElement;
+                const stream = videoElem.srcObject as MediaStream
+                call.answer(stream);
+                call.on("stream", (remoteStream) => {
+                    console.log(`Stream came from remote ${remoteStream.id}`);
+                    if (args.data?.body.streamType === "userstream") {
+                        const newUserStream: USERSTREAM = {
+                            title: '',
+                            stream: remoteStream,
+                            id: '',
+                            isPinned: false,
+                            videoTrack: remoteStream.getTracks().find((track) => track.kind === 'video')?.enabled || false,
+                            audioTrack: remoteStream.getTracks().find((track) => track.kind === 'audio')?.enabled || false,
+                        }
+                        addNewUserStream(newUserStream)
+                    }
+                    else if (args.data?.body.streamType === "screenmedia") {
+                        const newScreenMedia: SCREENMEDIA = {
+                            title: '',
+                            stream: remoteStream,
+                            id: '',
+                            isPinned: false,
+                            streamTrack: remoteStream ? true : false
+                        }
+                        addNewScreenMedia(newScreenMedia)
+                    }
+                })
+            })
+
+        })
+        socket.on(SOCKETEVENTS.USER_JOINED, (args: SOCKETRESPONSE<any>) => {
+            console.log(args.data?.body.peerId);
+            addNotification({ message: args.data?.message });
+            if (args.data?.body.peerId && myPeer) {
+                const req: SOCKETREQUEST = {
+                    userId: user?.id || "",
+                    meetId: '',
+                    type: '',
+                    data: {
+                        connectedSocket: args.data?.body.userSocketId,
+                        streamType: 'userstream',
+                        user: {
+                            name: user?.firstName + ' ' + user?.lastName
+                        }
+                    }
+                }
+                socket.emit(SOCKETEVENTS.SEND_STREAM_TYPE, req);
+            }
+        })
+
+        socket.on(SOCKETEVENTS.RECEIVE_ACK, (args: SOCKETRESPONSE<any>) => { // old user
+            console.log(args);
+            const videoElem = document.getElementById('self-video') as HTMLVideoElement;
+            const stream = videoElem.srcObject as MediaStream
+            const remotePeerCall = myPeer.call(args.data?.body.peerId, stream)
+            if (remotePeerCall) {
+                remotePeerCall.on("stream", (remoteStream) => {
+                    console.log(`Stream came from remote ${remoteStream.id}`);
+                    if (meetData?.participants.length === 1) {
+                        clearPinnedStreams();
+                    }
+                    const newUserStream: USERSTREAM = {
+                        title: '',
+                        stream: remoteStream,
+                        id: '',
+                        isPinned: false,
+                        videoTrack: remoteStream.getTracks().find((track) => track.kind === 'video')?.enabled || false,
+                        audioTrack: remoteStream.getTracks().find((track) => track.kind === 'audio')?.enabled || false,
+                    }
+                    console.log(newUserStream);
+                    addNewUserStream(newUserStream)
+                })
+            }
+        })
+
     }
 
     function sendSocketRequest(event: SOCKETEVENTS, data: SOCKETREQUEST) {
-        if (socket.connected) {
-            socket.emit(event, data);
+        if (socket) {
+            if (socket.connected) {
+                socket.emit(event, data);
+            }
         }
     }
     useEffect(() => {
-        let initSocket: Socket<DefaultEventsMap, DefaultEventsMap>;
-        if (socket === null) {
-            initSocket = connectSocket();
-            initSocket.on('connect', () => {
+        if (socket) {
+            socket.on('connect', () => {
                 setIsConnected(true);
             });
-            initSocket.on('disconnect', () => {
+            socket.on('disconnect', () => {
                 setIsConnected(false);
             });
-            setSocket(initSocket);
-            listenEvents(initSocket)
+            listenEvents(socket)
+            console.log(socket);
+            return () => {
+                socket.disconnect()
+            };
         }
-        return () => {
-            initSocket.off("connect");
-            initSocket.off("disconnect");
-            initSocket.disconnect()
-        };
     }, [])
-    return { isSocketConnected, sendSocketRequest, meetData, addNewScreenMedia, addNewUserStream, deleteScreenMedia, deleteUserStream, getAMedia, updateSelfStream }
+    return { isSocketConnected, sendSocketRequest, setMeetData, meetData, streams, addNewScreenMedia, addNewUserStream, deleteScreenMedia, deleteUserStream, getAMedia, updateSelfStream }
 }

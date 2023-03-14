@@ -1,29 +1,106 @@
-import { useState } from "react";
-import { MEETDATA, SCREENMEDIA, USERSTREAM } from "../types";
+import { useEffect, useState } from "react";
+import { MEETDATA, SCREENMEDIA, STREAMS, USERSTREAM } from "../types";
 
 export default function useMeetData() {
-    const [meetData, setMeetData] = useState<MEETDATA>({
+    const tempMeetData: MEETDATA = {
         participants: {
-            length: 1,
-            userIds: ['1234']
+            length: 0,
+            userIds: []
         },
+        meetId: "",
+        type: "",
+        admin: "",
+    }
+    const tempStreams: STREAMS = {
         userStreams: null,
-        screenMedias: null
-    });
+        screenMedias: null,
+    }
+    const [meetData, setMeetData] = useState<MEETDATA>(tempMeetData);
+    const [streams, setStreams] = useState<STREAMS>(tempStreams)
+    useEffect(() => {
+        console.log('Updated Meet Data:', meetData);
+    }, [meetData])
+    useEffect(() => {
+        console.log('Updated Streams:', streams);
+    }, [streams])
+    const getPinnedScreen = () => {
+        if (streams) {
+            if (streams.screenMedias) {
+                let pinnedStream: SCREENMEDIA | undefined;
+                let pinnedIndex = -1;
+                pinnedStream = streams.screenMedias.find((stream, index) => {
+                    if (stream.isPinned)
+                        pinnedIndex = index
+                    return stream.isPinned;
+                });
+                if (pinnedIndex === -1) {
+                    return undefined
+                }
+                return { pinnedIndex, pinnedStream };
+            }
+        }
+    }
+    const getPinnedUsers = () => {
+        if (streams) {
+            if (streams.userStreams) {
+                let pinnedStream: USERSTREAM | undefined;
+                let pinnedIndex = -1;
+                pinnedStream = streams.userStreams.find((stream, index) => {
+                    if (stream.isPinned)
+                        pinnedIndex = index
+                    return stream.isPinned;
+                });
+                if (pinnedIndex === -1) {
+                    return undefined
+                }
+                return { pinnedIndex, pinnedStream };
+            }
+        }
+    }
 
-    const getAMedia = (id: string): USERSTREAM | SCREENMEDIA | null => {
-        if (meetData) {
-            if (meetData.userStreams) {
-                for (let i = 0; i < meetData.userStreams.length; i++) {
-                    if (meetData.userStreams[i].id === id) {
-                        return meetData.userStreams[i];
+    const clearPinnedStreams = () => {
+        if (streams) {
+            let pinnedStream = getPinnedScreen();
+            if (pinnedStream) {
+                if (pinnedStream.pinnedStream) {
+                    pinnedStream.pinnedStream.isPinned = false
+                    const allScreenStreams = streams.screenMedias;
+                    if (allScreenStreams) {
+                        allScreenStreams.splice(pinnedStream.pinnedIndex, 1);
+                        allScreenStreams.unshift(pinnedStream.pinnedStream);
+                        setStreams({ ...streams, screenMedias: allScreenStreams })
+                    }
+                }
+            } else {
+                let pinnedUserStream = getPinnedUsers();
+                if (pinnedUserStream) {
+                    if (pinnedUserStream.pinnedStream) {
+                        pinnedUserStream.pinnedStream.isPinned = false
+                        const allUserStreams = streams.userStreams;
+                        if (allUserStreams) {
+                            allUserStreams.splice(pinnedUserStream.pinnedIndex, 1);
+                            allUserStreams.unshift(pinnedUserStream.pinnedStream);
+                            setStreams({ ...streams, userStreams: allUserStreams })
+                        }
                     }
                 }
             }
-            if (meetData.screenMedias) {
-                for (let i = 0; i < meetData.screenMedias.length; i++) {
-                    if (meetData.screenMedias[i].id === id) {
-                        return meetData.screenMedias[i];
+        }
+    }
+
+    const getAMedia = (id: string): USERSTREAM | SCREENMEDIA | null => {
+        if (streams) {
+            if (streams.userStreams) {
+                for (let i = 0; i < streams.userStreams.length; i++) {
+                    if (streams.userStreams[i].id === id) {
+                        return streams.userStreams[i];
+                    }
+                }
+            }
+            if (streams.screenMedias) {
+                for (let i = 0; i < streams.screenMedias.length; i++) {
+                    if (streams.screenMedias[i].id === id) {
+                        return streams.screenMedias[i];
                     }
                 }
             }
@@ -32,19 +109,22 @@ export default function useMeetData() {
         return null;
     }
     const addNewScreenMedia = (newMedia: SCREENMEDIA) => {
-        if (meetData) {
-            const oldScreenMedia = meetData.screenMedias;
+        clearPinnedStreams()
+        if (streams) {
+            const oldScreenMedia = streams.screenMedias;
             if (oldScreenMedia) {
                 const newScreenMedias = [...oldScreenMedia, newMedia];
-                setMeetData({ ...meetData, screenMedias: newScreenMedias })
+                setStreams({ ...streams, screenMedias: newScreenMedias })
                 return;
+            } else {
+                setStreams({ ...streams, screenMedias: [newMedia] })
             }
         }
     }
 
     const deleteScreenMedia = (id: string) => {
-        if (meetData) {
-            const screenMedias = meetData.screenMedias;
+        if (streams) {
+            const screenMedias = streams.screenMedias;
             let indexOfMedia = -1;
             if (screenMedias) {
                 for (let i = 0; i < screenMedias.length; i++) {
@@ -55,7 +135,7 @@ export default function useMeetData() {
                 }
                 if (indexOfMedia != -1) {
                     const newScreenMedias = screenMedias.splice(indexOfMedia, 1);
-                    setMeetData({ ...meetData, screenMedias: newScreenMedias })
+                    setStreams({ ...streams, screenMedias: newScreenMedias })
                     return;
                 }
             }
@@ -63,21 +143,22 @@ export default function useMeetData() {
     }
 
     const addNewUserStream = (newUserStream: USERSTREAM) => {
-        // console.log(newUserStream);
-        if (meetData) {
-            const oldUserMedia = meetData.userStreams;
+        console.log(streams);
+        if (streams) {
+            const oldUserMedia = streams.userStreams;
             if (oldUserMedia) {
                 const newUserMedias = [...oldUserMedia, newUserStream];
-                setMeetData({ ...meetData, userStreams: newUserMedias })
+                console.log("updated media:", newUserMedias);
+                setStreams({ ...streams, userStreams: newUserMedias })
                 return;
             }
-            setMeetData({ ...meetData, userStreams: [newUserStream] })
+            setStreams({ ...streams, userStreams: [newUserStream] })
         }
     }
 
     const deleteUserStream = (id: string) => {
-        if (meetData) {
-            const userStreams = meetData.userStreams;
+        if (streams) {
+            const userStreams = streams.userStreams;
             let indexOfStream = -1;
             if (userStreams) {
                 for (let i = 0; i < userStreams.length; i++) {
@@ -88,7 +169,7 @@ export default function useMeetData() {
                 }
                 if (indexOfStream != -1) {
                     const newuserStreams = userStreams.splice(indexOfStream, 1);
-                    setMeetData({ ...meetData, userStreams: newuserStreams })
+                    setStreams({ ...streams, userStreams: newuserStreams })
                     return;
                 }
             }
@@ -96,8 +177,8 @@ export default function useMeetData() {
     }
 
     const updateSelfStream = (media: USERSTREAM) => {
-        if (meetData) {
-            const userStreams = meetData.userStreams;
+        if (streams) {
+            const userStreams = streams.userStreams;
             let indexOfStream = -1;
             if (userStreams) {
                 for (let i = 0; i < userStreams.length; i++) {
@@ -108,7 +189,7 @@ export default function useMeetData() {
                 }
                 if (indexOfStream != -1) {
                     const newuserStreams = userStreams.splice(indexOfStream, 1);
-                    setMeetData({ ...meetData, userStreams: [...newuserStreams, media] })
+                    setStreams({ ...streams, userStreams: [...newuserStreams, media] })
                     return;
                 }
             }
@@ -117,11 +198,14 @@ export default function useMeetData() {
 
     return {
         meetData,
+        streams,
         getAMedia,
         addNewScreenMedia,
         addNewUserStream,
         deleteScreenMedia,
         deleteUserStream,
-        updateSelfStream
+        updateSelfStream,
+        setMeetData,
+        clearPinnedStreams
     }
 }
