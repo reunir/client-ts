@@ -1,5 +1,5 @@
 import React from "react";
-import { WhiteboardWithEditor } from "../components/whiteboard-new";
+import { WhiteboardWithEditor } from "../components/whiteboard";
 
 type Props = {};
 
