@@ -1,22 +1,23 @@
-import React, { useEffect } from 'react';
-import { useAuth } from './context/auth-context';
-import { setAxiosDefault, setToken } from './axiosDefault';
-import Loading from './components/Loading';
-import { Route, Routes } from 'react-router-dom';
-import NotFound from './pages/404';
-import { SignupProvider } from './context/signup-context';
-import { setUserAvatar } from './utils/generateAvatar';
-import Meet from './pages/Meet';
-import useUIMode from './hooks/setMode';
-import MeetOutlet from './pages/MeetOutlet';
-import Global from './components/Global';
-import JoinMeet from './pages/JoinMeet';
-import CreateMeetMiddleware from './pages/CreateMeetMiddleware';
-import JoinMeetMiddleware from './pages/JoinMeetMiddleware';
+import React, { useEffect } from "react";
+import { useAuth } from "./context/auth-context";
+import { setAxiosDefault, setToken } from "./axiosDefault";
+import Loading from "./components/Loading";
+import { Route, Routes } from "react-router-dom";
+import NotFound from "./pages/404";
+import { SignupProvider } from "./context/signup-context";
+import { setUserAvatar } from "./utils/generateAvatar";
+import Meet from "./pages/Meet";
+import useUIMode from "./hooks/setMode";
+import MeetOutlet from "./pages/MeetOutlet";
+import Global from "./components/Global";
+import JoinMeet from "./pages/JoinMeet";
+import CreateMeetMiddleware from "./pages/CreateMeetMiddleware";
+import JoinMeetMiddleware from "./pages/JoinMeetMiddleware";
+import Whiteboard from "./pages/Whiteboard";
 
-const Signup = React.lazy(() => import('./pages/Signup'));
-const Login = React.lazy(() => import('./pages/Login'));
-const Redirect = React.lazy(() => import('./pages/Redirect'));
+const Signup = React.lazy(() => import("./pages/Signup"));
+const Login = React.lazy(() => import("./pages/Login"));
+const Redirect = React.lazy(() => import("./pages/Redirect"));
 function App() {
   const { token, getUserData, user } = useAuth();
   useUIMode();
@@ -40,6 +41,7 @@ function App() {
         <Routes>
           <Route element={<Global />}>
             <Route path="/login" element={<Login />} />
+            <Route path="/wb" element={<Whiteboard />} />
             <Route
               path="/signup"
               element={
