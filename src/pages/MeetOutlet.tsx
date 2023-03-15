@@ -5,6 +5,17 @@ import useMeetSocket from '../hooks/meetSocket';
 import { v4 as uuid } from 'uuid';
 import { SOCKETEVENTS, SOCKETREQUEST } from '../types/Socket';
 import connectSocket from '../utils/socket';
+import { useUserMedia } from '../hooks/userStream';
+import {
+  CAPTURE_OPTIONS,
+  SCREENMEDIA,
+  SCREEN_CAPTURE_OPTIONS,
+  STREAMS,
+  USERSTREAM,
+} from '../types';
+import useScreenCapture from '../hooks/screenCapture';
+import useMeetData from '../hooks/meetData';
+import useHandlePinUnpin from '../hooks/handlePinUnpin';
 
 export default function MeetOutlet() {
   const { id, encryptedhash } = useParams();
@@ -15,20 +26,95 @@ export default function MeetOutlet() {
   const { addError, addNotification } = useOutletContext<any>();
   const socket = connectSocket();
   const {
-    isSocketConnected,
-    sendSocketRequest,
+    mediaStream,
+    videoTrack,
+    audioTrack,
+    toggleAudio,
+    toggleCamera,
+    enableUserStream,
+  } = useUserMedia(CAPTURE_OPTIONS);
+  const { screenStream, streamTrack, enableStream } = useScreenCapture(
+    SCREEN_CAPTURE_OPTIONS
+  );
+
+  const {
     meetData,
-    addNewUserStream,
-    getAMedia,
-    updateSelfStream,
+    streams,
+    setStreams,
     addNewScreenMedia,
     setMeetData,
+    addNewUserStream,
+    deleteScreenMedia,
+    deleteUserStream,
+    clearPinnedStreams,
+  } = useMeetData();
+  const { isSocketConnected, sendSocketRequest } = useMeetSocket(
+    socket,
+    addNotification,
+    addError,
+    peerId,
+    meetData,
     streams,
-  } = useMeetSocket(socket, addNotification, addError, peerId);
+    addNewScreenMedia,
+    addNewUserStream,
+    setMeetData,
+    clearPinnedStreams,
+    enableUserStream
+  );
+
+  const { pinnedStream, unpinnedStreams } = useHandlePinUnpin(streams);
 
   useEffect(() => {
     if (id) setMeetId(id);
   }, [id]);
+
+  useEffect(() => {
+    // for my media
+    if (mediaStream) {
+      let name = '';
+      if (user) {
+        name = user.firstName + ' ' + user.lastName;
+      }
+      const selfStream: USERSTREAM = {
+        title: name,
+        stream: mediaStream,
+        videoTrack,
+        audioTrack,
+        id: 'self',
+        isPinned: true, // if self is present pin him
+      };
+      let oldStreams = streams.userStreams;
+      if (oldStreams) {
+        oldStreams.push(selfStream);
+      } else {
+        oldStreams = [selfStream];
+      }
+      setStreams({ ...streams, userStreams: oldStreams });
+    }
+  }, [mediaStream]);
+  useEffect(() => {
+    // for screen share
+    if (screenStream) {
+      let name = '';
+      if (user) {
+        name = user.firstName;
+      }
+      const newMedia: SCREENMEDIA = {
+        stream: screenStream,
+        title: name + ' is presenting their screen',
+        streamTrack: true,
+        id: 'screen',
+        isPinned: true,
+      };
+      let oldStreams = streams.screenMedias;
+      if (oldStreams) {
+        oldStreams.push(newMedia);
+      } else {
+        oldStreams = [newMedia];
+      }
+      setStreams({ ...streams, screenMedias: oldStreams });
+    }
+  }, [screenStream]);
 
   useEffect(() => {
     return function cleanup() {
@@ -52,6 +138,14 @@ export default function MeetOutlet() {
         context={{
           meetId,
           streams,
+          meetData,
+          toggleAudio,
+          enableStream,
+          toggleCamera,
+          pinnedStream,
+          unpinnedStreams,
+          audioTrack,
+          videoTrack,
           isSocketConnected,
           addError,
           addNotification,
@@ -61,12 +155,10 @@ export default function MeetOutlet() {
           encryptedhash,
           isThisMeetVerified,
           setIsThisMeetVerified,
-          meetData,
           setMeetData,
           addNewUserStream,
-          getAMedia,
-          updateSelfStream,
           peerId,
+          enableUserStream,
         }}
       />
     </>

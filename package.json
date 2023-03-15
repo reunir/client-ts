@@ -5,6 +5,7 @@
   "dependencies": {
     "@crello/react-lottie": "^0.0.11",
     "@react-oauth/google": "^0.7.0",
+    "@styled-icons/bootstrap": "^10.47.0",
     "@styled-icons/fa-brands": "^10.47.0",
     "@styled-icons/fluentui-system-filled": "^10.47.0",
     "@styled-icons/ionicons-sharp": "^10.46.0",

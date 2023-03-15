@@ -7,6 +7,10 @@ export interface LoginBody {
     token: string
 }
 
+export interface WhiteBoardCreateBody {
+    whiteboardId: string
+}
+
 type ErrorTimeout = {
     timeOutId: NodeJS.Timeout,
     arrayIndex: number

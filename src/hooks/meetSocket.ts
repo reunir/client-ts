@@ -6,10 +6,10 @@ import { DefaultEventsMap } from "@socket.io/component-emitter";
 import { useNavigate } from "react-router-dom";
 import useMeetData from "./meetData";
 import Peer, { DataConnection, MediaConnection } from "peerjs";
-import { PeerDataType, SCREENMEDIA, USERSTREAM } from "../types";
+import { MEETDATA, PeerDataType, SCREENMEDIA, STREAMS, USERSTREAM, userType } from "../types";
 import { useAuth } from "../context/auth-context";
 
-export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEventsMap>, addNotification: any, addError: any, peerId: string) {
+export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEventsMap>, addNotification: any, addError: any, peerId: string, meetData: MEETDATA, streams: STREAMS, addNewScreenMedia: (newMedia: SCREENMEDIA) => void, addNewUserStream: (newMedia: USERSTREAM) => void, setMeetData: any, clearPinnedStreams: () => void, enableUserStream: () => Promise<void>) {
     const [isSocketConnected, setIsConnected] = useState(false);
     const [myPeer, setMyPeer] = useState<Peer>(new Peer(peerId, {
         host: 'localhost',
@@ -17,7 +17,6 @@ export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEv
         path: '/',
     }))
 
-    const { meetData, streams, addNewScreenMedia, setMeetData, addNewUserStream, deleteScreenMedia, deleteUserStream, getAMedia, updateSelfStream, clearPinnedStreams } = useMeetData();
     const navigate = useNavigate();
     const { user } = useAuth();
     function listenEvents(socket: Socket<DefaultEventsMap, DefaultEventsMap>) {
@@ -36,6 +35,8 @@ export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEv
             })
         })
         socket.on(SOCKETEVENTS.SUCCESSFULL_JOIN, (args: SOCKETRESPONSE<any>) => {
+            console.log('Successfully joined:', args);
+
             const meetDetails = args.data?.body.meetDetails
             setMeetData({
                 participants: {
@@ -46,6 +47,7 @@ export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEv
                 type: meetDetails.type,
                 admin: meetDetails.admin
             })
+            enableUserStream();
             console.log('Meeting data set');
         })
         socket.on(SOCKETEVENTS.RECEIVE_STREAM_TYPE, (args: SOCKETRESPONSE<any>) => { // recently joined user
@@ -54,7 +56,8 @@ export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEv
                 data: {
                     ack: true,
                     peerId: myPeer.id,
-                    to: args.data?.body.socketId
+                    to: args.data?.body.socketId,
+                    user: user
                 },
                 meetId: '',
                 userId: '',
@@ -94,6 +97,16 @@ export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEv
         })
         socket.on(SOCKETEVENTS.USER_JOINED, (args: SOCKETRESPONSE<any>) => {
             console.log(args.data?.body.peerId);
+            const meetDetails = args.data?.body.meetDetails
+            setMeetData({
+                participants: {
+                    length: meetDetails.participantCount,
+                    userIds: meetDetails.participants
+                },
+                meetId: meetDetails.meetId,
+                type: meetDetails.type,
+                admin: meetDetails.admin
+            })
             addNotification({ message: args.data?.message });
             if (args.data?.body.peerId && myPeer) {
                 const req: SOCKETREQUEST = {
@@ -123,10 +136,11 @@ export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEv
                     if (meetData?.participants.length === 1) {
                         clearPinnedStreams();
                     }
+                    const user = args.data?.body.user as userType;
                     const newUserStream: USERSTREAM = {
-                        title: '',
+                        title: user?.firstName + ' ' + user?.lastName || "",
                         stream: remoteStream,
-                        id: '',
+                        id: user?.id || "",
                         isPinned: false,
                         videoTrack: remoteStream.getTracks().find((track) => track.kind === 'video')?.enabled || false,
                         audioTrack: remoteStream.getTracks().find((track) => track.kind === 'audio')?.enabled || false,
@@ -161,5 +175,5 @@ export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEv
             };
         }
     }, [])
-    return { isSocketConnected, sendSocketRequest, setMeetData, meetData, streams, addNewScreenMedia, addNewUserStream, deleteScreenMedia, deleteUserStream, getAMedia, updateSelfStream }
+    return { isSocketConnected, sendSocketRequest }
 }

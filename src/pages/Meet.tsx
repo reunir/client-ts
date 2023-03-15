@@ -5,6 +5,7 @@ import MeetControls from '../components/MeetControls';
 import Pinned from '../components/PinnedStream';
 import Unpinned from '../components/UnpinnedStream';
 import { useAuth } from '../context/auth-context';
+import useHandlePinUnpin from '../hooks/handlePinUnpin';
 import useMeetHooks from '../hooks/meetHooks';
 import { SOCKETEVENTS, SOCKETREQUEST } from '../types/Socket';
 
@@ -15,37 +16,18 @@ export default function Meet() {
   const {
     setIsThisMeetVerified,
     meetId,
-    meetData,
     streams,
-    setMeetData,
-    addNewUserStream,
-    addNewScreenMedia,
-    getAMedia,
-    updateSelfStream,
-    addError,
-    addNotification,
+    pinnedStream,
+    unpinnedStreams,
+    toggleAudio,
+    enableStream,
+    toggleCamera,
+    audioTrack,
+    meetData,
+    videoTrack,
     sendSocketRequest,
     peerId,
   } = useOutletContext<any>();
-  const {
-    mediaStream,
-    videoTrack,
-    audioTrack,
-    toggleAudio,
-    toggleCamera,
-    screenStream,
-    streamTrack,
-    enableStream,
-    pinnedStream,
-    unpinnedStreams,
-  } = useMeetHooks(
-    meetData,
-    streams,
-    addNewUserStream,
-    addNewScreenMedia,
-    getAMedia,
-    updateSelfStream
-  );
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -68,19 +50,17 @@ export default function Meet() {
     }
   }, []);
   useEffect(() => {
-    if (mediaStream) {
-      if (user) {
-        const req: SOCKETREQUEST = {
-          userId: user.id,
-          meetId: meetId,
-          type: '',
-          data: '',
-          peerId: peerId,
-        };
-        sendSocketRequest(SOCKETEVENTS.JOIN_ROOM, req);
-      }
+    if (user && meetId) {
+      const req: SOCKETREQUEST = {
+        userId: user.id,
+        meetId: meetId,
+        type: '',
+        data: '',
+        peerId: peerId,
+      };
+      sendSocketRequest(SOCKETEVENTS.JOIN_ROOM, req);
     }
-  }, [mediaStream]);
+  }, [meetId]);
   return (
     <div className="w-screen h-screen grid bg-slate-300">
       <div
@@ -103,6 +83,7 @@ export default function Meet() {
           <Pinned pinnedStream={pinnedStream} />
           <Unpinned unpinnedStream={unpinnedStreams} />
         </div>
+        {/* {JSON.stringify(streams)} */}
       </div>
       <div
         className={`w-full max-h-fit ${
@@ -111,6 +92,7 @@ export default function Meet() {
       ></div>
       <MeetControls
         toggleAudio={toggleAudio}
+        meetData={meetData}
         enableStream={enableStream}
         toggleCamera={toggleCamera}
         audioTrack={audioTrack}

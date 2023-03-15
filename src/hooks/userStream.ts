@@ -31,8 +31,8 @@ export function useUserMedia(requestedMedia: StreamOptions) {
     }
   }
 
-  useEffect(() => {
-    async function enableStream() {
+  async function enableUserStream() {
+    if (!mediaStream) {
       try {
         const stream = await navigator.mediaDevices.getUserMedia(
           requestedMedia
@@ -44,17 +44,16 @@ export function useUserMedia(requestedMedia: StreamOptions) {
         console.log(err);
       }
     }
-
-    if (!mediaStream) {
-      enableStream();
-    } else {
-      return function cleanup() {
+  }
+  useEffect(() => {
+    return function cleanup() {
+      if (mediaStream) {
         mediaStream.getTracks().forEach((track) => {
           track.stop();
         });
-      };
-    }
-  }, [mediaStream, requestedMedia]);
+      }
+    };
+  }, []);
 
-  return { mediaStream, toggleAudio, toggleCamera, videoTrack, audioTrack };
+  return { enableUserStream, mediaStream, toggleAudio, toggleCamera, videoTrack, audioTrack };
 }

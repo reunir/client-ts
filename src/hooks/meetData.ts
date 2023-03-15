@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useAuth } from "../context/auth-context";
 import { MEETDATA, SCREENMEDIA, STREAMS, USERSTREAM } from "../types";
 
 export default function useMeetData() {
@@ -11,12 +12,12 @@ export default function useMeetData() {
         type: "",
         admin: "",
     }
+    const [meetData, setMeetData] = useState<MEETDATA>(tempMeetData);
     const tempStreams: STREAMS = {
         userStreams: null,
         screenMedias: null,
-    }
-    const [meetData, setMeetData] = useState<MEETDATA>(tempMeetData);
-    const [streams, setStreams] = useState<STREAMS>(tempStreams)
+    };
+    const [streams, setStreams] = useState<STREAMS>(tempStreams);
     useEffect(() => {
         console.log('Updated Meet Data:', meetData);
     }, [meetData])
@@ -87,27 +88,6 @@ export default function useMeetData() {
             }
         }
     }
-
-    const getAMedia = (id: string): USERSTREAM | SCREENMEDIA | null => {
-        if (streams) {
-            if (streams.userStreams) {
-                for (let i = 0; i < streams.userStreams.length; i++) {
-                    if (streams.userStreams[i].id === id) {
-                        return streams.userStreams[i];
-                    }
-                }
-            }
-            if (streams.screenMedias) {
-                for (let i = 0; i < streams.screenMedias.length; i++) {
-                    if (streams.screenMedias[i].id === id) {
-                        return streams.screenMedias[i];
-                    }
-                }
-            }
-            return null;
-        }
-        return null;
-    }
     const addNewScreenMedia = (newMedia: SCREENMEDIA) => {
         clearPinnedStreams()
         if (streams) {
@@ -145,14 +125,19 @@ export default function useMeetData() {
     const addNewUserStream = (newUserStream: USERSTREAM) => {
         console.log(streams);
         if (streams) {
-            const oldUserMedia = streams.userStreams;
+            let oldUserMedia = streams.userStreams;
+            let newStreams: STREAMS;
             if (oldUserMedia) {
-                const newUserMedias = [...oldUserMedia, newUserStream];
-                console.log("updated media:", newUserMedias);
-                setStreams({ ...streams, userStreams: newUserMedias })
-                return;
+                console.log(oldUserMedia.concat(newUserStream));
+            } else {
+                oldUserMedia = [newUserStream]
             }
-            setStreams({ ...streams, userStreams: [newUserStream] })
+            console.log("User streams:", oldUserMedia);
+
+            setStreams(old => ({
+                ...old,
+                userStreams: oldUserMedia
+            }))
         }
     }
 
@@ -176,35 +161,14 @@ export default function useMeetData() {
         }
     }
 
-    const updateSelfStream = (media: USERSTREAM) => {
-        if (streams) {
-            const userStreams = streams.userStreams;
-            let indexOfStream = -1;
-            if (userStreams) {
-                for (let i = 0; i < userStreams.length; i++) {
-                    if (userStreams[i].id === 'self') {
-                        indexOfStream = i;
-                        break;
-                    }
-                }
-                if (indexOfStream != -1) {
-                    const newuserStreams = userStreams.splice(indexOfStream, 1);
-                    setStreams({ ...streams, userStreams: [...newuserStreams, media] })
-                    return;
-                }
-            }
-        }
-    }
-
     return {
         meetData,
         streams,
-        getAMedia,
+        setStreams,
         addNewScreenMedia,
         addNewUserStream,
         deleteScreenMedia,
         deleteUserStream,
-        updateSelfStream,
         setMeetData,
         clearPinnedStreams
     }

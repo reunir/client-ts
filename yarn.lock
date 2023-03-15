@@ -1702,6 +1702,14 @@
   resolved "https://registry.yarnpkg.com/@socket.io/component-emitter/-/component-emitter-3.1.0.tgz#96116f2a912e0c02817345b3c10751069920d553"
   integrity sha512-+9jVqKhRSpsc591z5vX+X5Yyw+he/HCB4iQ/RYxw35CEPaY1gnsNE43nf9n9AaYjAQrTiI/mOwKUKdUs9vf7Xg==
 
+"@styled-icons/bootstrap@^10.47.0":
+  version "10.47.0"
+  resolved "https://registry.yarnpkg.com/@styled-icons/bootstrap/-/bootstrap-10.47.0.tgz#c3e363dfe87b732a5da818f320f90f5ab4961b84"
+  integrity sha512-xpnPdrLhAhpTRE4iljQIEK73twVj7VPglwHSL+8nQdH7EsW5RJIOWsmlkZMyqhQHN0H7fGmT10F3/6OQhSpfGg==
+  dependencies:
+    "@babel/runtime" "^7.20.7"
+    "@styled-icons/styled-icon" "^10.7.0"
+
 "@styled-icons/fa-brands@^10.47.0":
   version "10.47.0"
   resolved "https://registry.yarnpkg.com/@styled-icons/fa-brands/-/fa-brands-10.47.0.tgz#f21190720a614319ef52d39afe0f2518ae0bbd16"
