@@ -34,6 +34,11 @@ export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEv
     }
     function listenEvents(socket: Socket<DefaultEventsMap, DefaultEventsMap>) {
 
+        socket.on(SOCKETEVENTS.HAND_RAISED, (args: SOCKETRESPONSE<any>) => {
+            console.log(args)
+            addNotification({ message: args.data?.body.message })
+        })
+
         socket.on(SOCKETEVENTS.RECIEVE_MESSAGE, (args: SOCKETRESPONSE<AChat>) => {
             console.log(args);
             let oldchats = meetData.chats;
