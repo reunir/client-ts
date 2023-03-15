@@ -4,10 +4,12 @@ import Avatar from './Avatar';
 export default function AudioVisualizer({
   stream,
   className,
+  setIfSpeaking,
   audioTrack,
 }: {
   stream: MediaStream | null;
   className?: string | null;
+  setIfSpeaking: React.Dispatch<React.SetStateAction<boolean>>;
   audioTrack: boolean;
 }) {
   const analyserCanvas = useRef<HTMLDivElement>(null);
@@ -19,7 +21,6 @@ export default function AudioVisualizer({
   const audioRef = createRef<HTMLAudioElement>();
   useEffect(() => {
     if (stream && audioRef.current && !audioRef.current.srcObject) {
-      console.log('Here hu!');
       audioRef.current.srcObject = stream;
     }
     if (stream) {
@@ -52,6 +53,16 @@ export default function AudioVisualizer({
           elements[i].style.transform = `rotateZ(${
             i * (360 / bufferLength)
           }deg) translate(-50%,${clamp(item, 100, 150)}px)`;
+        }
+        let isspeaking = false;
+        for (let i in data) {
+          if (data[i] > 30) {
+            isspeaking = true;
+            setIfSpeaking(true);
+          }
+        }
+        if (!isspeaking) {
+          setIfSpeaking(false);
         }
       };
       requestAnimationFrame(loopingFunction);

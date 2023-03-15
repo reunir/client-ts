@@ -27,18 +27,10 @@ export default function Header({
       onMouseOver={headerFocusIn}
       className={`${className} static grid grid-flow-col pr-[10px] lg:pr-0 lg:grid-cols-[3fr_11fr_1fr_1fr_1fr] grid-cols-[2fr_1fr_1fr] top-0 left-0 w-full h-[80px] bg-slate-100 dark:bg-gray-700`}
     >
-      <div className="grid place-content-center font-inter font-medium dark:text-gray-100 text-4xl text-gray-700">
-        reunir
-      </div>
+      <div className="grid place-content-center font-inter font-medium dark:text-gray-100 text-4xl text-gray-700"></div>
       <div></div>
       <div className="grid">
         {/* <ShareDetails addNotification={addNotification} id={id} /> */}
-      </div>
-      <div className="grid place-content-center">
-        <ModeSwitcher />
-      </div>
-      <div className="grid lg:w-[60px] w-[40px] cursor-pointer rounded-full place-self-center overflow-hidden">
-        <Avatar className="" />
       </div>
     </div>
   );

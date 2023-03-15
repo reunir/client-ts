@@ -12,12 +12,18 @@ import { SOCKETEVENTS, SOCKETREQUEST } from '../types/Socket';
 import { AChat, userType } from '../types';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/auth-context';
+import { Send } from '@styled-icons/bootstrap';
+import { Close } from '@styled-icons/ionicons-sharp';
 export default function Chat({
+  isChatShown,
+  setIsChatShown,
   chatHistory,
   sendSocketRequest,
   meetId,
   participantData,
 }: {
+  isChatShown: boolean;
+  setIsChatShown: React.Dispatch<React.SetStateAction<boolean>>;
   chatHistory: [AChat];
   sendSocketRequest: (event: SOCKETEVENTS, data: SOCKETREQUEST) => void;
   meetId: string;
@@ -114,9 +120,22 @@ export default function Chat({
     setChats(chatData.allChats);
   }, [chatData]);
   return (
-    <div className="w-[400px] grid grid-rows-[auto_1fr] h-[95%] self-center border rounded-md bg-gray-200 border-gray-400">
+    <div className="w-[400px] relative grid grid-rows-[auto_1fr_auto] h-[750px] self-center border rounded-md bg-white border-gray-400">
+      <div className="w-full h-[80px] grid top-0 left-0">
+        <div className="grid w-auto h-auto m-[10px]">
+          <div className="grid font-semibold text-xl self-center pl-[20px] text-gray-800">
+            Conversations
+          </div>
+          <div
+            onClick={() => setIsChatShown(!isChatShown)}
+            className="absolute right-[10px] justify-self-center grid w-fit h-fit p-[5px] rounded-full cursor-pointer hover:bg-gray-300"
+          >
+            <Close color="darkgray" width={25} />
+          </div>
+        </div>
+      </div>
       <div
-        className={`overflow-y-scroll h-[660px]
+        className={`overflow-y-scroll
         } grid`}
         id="chat-scrollbar"
       >
@@ -252,7 +271,7 @@ export default function Chat({
           </div>
         </div>
       </div>
-      <div className="grid w-[95%] border-t-[1px] border-gray-400 h-[90%] place-self-center">
+      <div className="grid h-[80px]">
         <div
           className={`grid grid-flow-row ${
             replyTo !== -1 ? 'grid-rows-[auto_1fr]' : ''
@@ -273,21 +292,23 @@ export default function Chat({
           ) : (
             ''
           )}
-          <div className="grid grid-flow-col">
-            <div className="w-[90%] h-[70%] place-self-center">
-              <input
-                type="text"
-                name="newChat"
-                id="newChat"
-                placeholder="Type a message..."
-                className="w-full h-full bg-gray-300 pl-[5px] rounded outline-none text-gray-800 dark:text-slate-200"
-              />
+          <div className="grid grid-flow-col w-fit h-[60px] place-self-center rounded-[50px] overflow-hidden bg-gray-200 gap-[5px]">
+            <div className="w-[250px] grid h-[70%] place-self-center">
+              <div className="grid w-[90%] place-self-end h-full">
+                <input
+                  type="text"
+                  name="newChat"
+                  id="newChat"
+                  placeholder="Type a message..."
+                  className="m-0 p-0 h-full pl-[10px] bg-gray-200 rounded outline-none text-gray-800 dark:text-slate-200"
+                />
+              </div>
             </div>
             <div
               onClick={sendMessage}
-              className="grid place-content-center w-[100px] h-[70%] rounded-md cursor-pointer hover:bg-green-600 text-lg mx-[10px] place-self-center bg-green-500 text-white"
+              className="grid place-content-center w-[40px] h-[40px] rounded-full cursor-pointer hover:bg-green-600 text-lg mx-[10px] place-self-center bg-green-500 text-white"
             >
-              Send
+              <Send width={22} />
             </div>
           </div>
         </div>

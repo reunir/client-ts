@@ -10,6 +10,7 @@
     "@styled-icons/fluentui-system-filled": "^10.47.0",
     "@styled-icons/fluentui-system-regular": "^10.47.0",
     "@styled-icons/ionicons-sharp": "^10.46.0",
+    "@styled-icons/material-rounded": "^10.47.0",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^13.0.0",
     "@testing-library/user-event": "^13.2.1",

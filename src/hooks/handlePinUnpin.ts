@@ -1,66 +1,63 @@
 import { useEffect, useState } from 'react';
 import { MEETDATA, PINNEDSTREAM, SCREENMEDIA, STREAMS, UNPINNEDSTREAMS, USERSTREAM, WHICHSTREAM } from '../types';
 
-export default function useHandlePinUnpin(meetData: STREAMS) {
-  const [pinnedStream, setPinnedStream] = useState<
-    null | PINNEDSTREAM
-  >(null);
+export default function useHandlePinUnpin(streams: STREAMS) {
+  const tempPinnedStream: PINNEDSTREAM = {
+    screenMedia: [],
+    userStream: [],
+    type: WHICHSTREAM.NONE
+  }
+  const [pinnedStream, setPinnedStream] = useState<PINNEDSTREAM>(tempPinnedStream);
+  const tempUnpinnedStreams: UNPINNEDSTREAMS = {
+    screenMedias: [],
+    userStreams: [],
+    length: 0
+  }
   const [unpinnedStreams, setUnpinnedStreams] =
-    useState<null | UNPINNEDSTREAMS>(null);
+    useState<UNPINNEDSTREAMS>(tempUnpinnedStreams);
   const updatePinUnpinScreen = (media: SCREENMEDIA) => {
     if (media.isPinned) setPinnedStream({
-      screenMedia: media,
-      userStream: null,
+      screenMedia: [media],
+      userStream: [],
       type: WHICHSTREAM.SCREEN
     });
     else {
-      if (unpinnedStreams) {
-        const oldScreenMedias = unpinnedStreams.screenMedias;
-        let newScreenMedias;
-        if (oldScreenMedias) newScreenMedias = [...oldScreenMedias, media];
-        newScreenMedias = [media];
-        setUnpinnedStreams({
-          ...unpinnedStreams,
-          screenMedias: newScreenMedias,
-        });
-        return;
-      }
-      setUnpinnedStreams({ screenMedias: [media], userStreams: null });
+      const oldScreenMedias = unpinnedStreams.screenMedias;
+      oldScreenMedias.push(media)
+      setUnpinnedStreams({
+        ...unpinnedStreams,
+        length: oldScreenMedias.length + unpinnedStreams.userStreams.length,
+        screenMedias: oldScreenMedias,
+      });
+      return;
     }
   };
   const updatePinUnpinUser = (media: USERSTREAM) => {
     if (media.isPinned) setPinnedStream({
-      userStream: media,
-      screenMedia: null,
+      userStream: [media],
+      screenMedia: [],
       type: WHICHSTREAM.USER
     });
     else {
-      if (unpinnedStreams) {
-        const olduserStreams = unpinnedStreams.userStreams;
-        let newuserStreams;
-        if (olduserStreams) newuserStreams = [...olduserStreams, media];
-        newuserStreams = [media];
-        setUnpinnedStreams({ ...unpinnedStreams, userStreams: newuserStreams });
-        return;
-      }
-      setUnpinnedStreams({ screenMedias: null, userStreams: [media] });
+      const olduserStreams = unpinnedStreams.userStreams;
+      olduserStreams.push(media)
+      setUnpinnedStreams({ ...unpinnedStreams, userStreams: olduserStreams, length: olduserStreams.length + unpinnedStreams.screenMedias.length, });
+      return;
     }
   };
   const updatePinnedAndUnpinnedStreams = () => {
-    if (meetData) {
-      if (meetData.screenMedias) {
-        meetData.screenMedias.forEach(updatePinUnpinScreen);
-      }
-      if (meetData.userStreams) {
-        meetData.userStreams.forEach(updatePinUnpinUser);
-      }
+    if (streams.screenMedias.length != 0) {
+      streams.screenMedias.forEach(updatePinUnpinScreen);
+    }
+    if (streams.userStreams.length != 0) {
+      streams.userStreams.forEach(updatePinUnpinUser);
     }
   };
   useEffect(() => {
-    if (meetData) {
+    if (streams) {
       updatePinnedAndUnpinnedStreams();
     }
-  }, [meetData]);
+  }, [streams]);
   return {
     pinnedStream,
     unpinnedStreams,

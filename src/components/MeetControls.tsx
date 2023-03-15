@@ -1,4 +1,4 @@
-import { ThreeDotsVertical } from '@styled-icons/bootstrap';
+import { ChatLeftTextFill, ThreeDotsVertical } from '@styled-icons/bootstrap';
 import {
   Camera,
   CameraOff,
@@ -20,8 +20,13 @@ import { v4 as uuid } from 'uuid';
 import { useAuth } from '../context/auth-context';
 import { SOCKETEVENTS, SOCKETREQUEST } from '../types/Socket';
 import { Share, Whiteboard } from '@styled-icons/fluentui-system-regular';
+import { CallEnd } from '@styled-icons/material-rounded';
+import ModeSwitcher from './ModeSwitcher';
+import Avatar from './Avatar';
 
 export default function MeetControls({
+  isChatShown,
+  setIsChatShown,
   className,
   setIsMeetNavShown,
   videoTrack,
@@ -33,6 +38,8 @@ export default function MeetControls({
   sendSocketRequest,
   setSendFileModal,
 }: {
+  isChatShown: boolean;
+  setIsChatShown: React.Dispatch<React.SetStateAction<boolean>>;
   className: string;
   setIsMeetNavShown: any;
   videoTrack: boolean;
@@ -112,48 +119,66 @@ export default function MeetControls({
       <div
         onMouseOut={headerFocusOut}
         onMouseOver={headerFocusIn}
-        className={`${className} grid grid-cols-[1fr_5fr_1fr] bg-slate-300/60`}
+        className={`${className} grid bg-[#202124]`}
       >
-        <div></div>
-        <div className="grid place-content-center">
-          <div className="grid grid-cols-[auto_auto_auto_auto_auto] gap-[10px]">
+        <div className="grid relative">
+          <div className="absolute left-[30px] grid h-full text-white text-lg place-content-center">
+            &#169; reunir
+          </div>
+          <div className="grid place-self-center grid-cols-[auto_auto_auto_auto_auto] gap-[10px]">
             <button
               onClick={toggleAudio}
               className={`grid cursor-pointer place-content-center place-self-center w-[50px] h-[50px] rounded-full ${
                 audioTrack
-                  ? 'bg-red-700 hover:bg-red-800 text-white'
-                  : 'bg-slate-400 dark:bg-red-700 dark:hover:bg-red-800 hover:bg-slate-500 text-gray-800 dark:text-white'
+                  ? 'bg-[#202124] hover:bg-[#3D4143] text-white'
+                  : 'bg-slate-400 dark:bg-[#202124] dark:hover:bg-[#3D4143] hover:bg-slate-500 text-gray-800 dark:text-white'
               } `}
             >
               {!audioTrack ? <MicOff width={30} /> : <Mic width={30} />}
             </button>
-            <div className="grid grid-flow-col place-content-center w-[150px] h-[60px] font-medium dark:bg-red-700 bg-red-800 rounded-lg text-xl text-white">
+            <div className="grid cursor-pointer place-content-center place-self-center w-[50px] h-[50px] rounded-full dark:bg-[#EA4335] bg-[#EA4335] text-xl text-white">
               <div className="grid place-content-center place-self-start">
-                Leave call
+                <CallEnd width={30} />
               </div>
             </div>
             <button
               onClick={toggleCamera}
               className={`grid cursor-pointer place-content-center place-self-center w-[50px] h-[50px] rounded-full ${
                 videoTrack
-                  ? 'bg-red-700 hover:bg-red-800 text-white'
-                  : 'bg-slate-400 dark:bg-red-700 dark:hover:bg-red-800 hover:bg-slate-500 text-gray-800 dark:text-white'
+                  ? 'bg-[#202124] hover:bg-[#3D4143] text-white'
+                  : 'bg-slate-400 dark:bg-[#202124] dark:hover:bg-[#3D4143] hover:bg-slate-500 text-gray-800 dark:text-white'
               } `}
             >
               {!videoTrack ? <CameraOff width={30} /> : <Camera width={30} />}
             </button>
             <button
               onClick={enableStream}
-              className="grid cursor-pointer place-content-center place-self-center w-[50px] h-[50px] rounded-full bg-red-700 hover:bg-red-800 text-white"
+              className="grid cursor-pointer place-content-center place-self-center w-[50px] h-[50px] rounded-full bg-[#202124] hover:bg-[#3D4143] text-white"
             >
               {<ShareScreenStart width={30} />}
             </button>
             <button
               onClick={showOptionList}
-              className="grid cursor-pointer place-content-center place-self-center w-[50px] h-[50px] rounded-full bg-red-700 hover:bg-red-800 text-white"
+              className="grid cursor-pointer place-content-center place-self-center w-[50px] h-[50px] rounded-full bg-[#202124] hover:bg-[#3D4143] text-white"
             >
               {<ThreeDotsVertical width={30} />}
             </button>
+          </div>
+          <div className="absolute w-fit grid grid-cols-[auto_auto_auto] gap-[30px] h-full right-[30px]">
+            <div className="grid place-content-center place-self-center">
+              <button
+                onClick={() => setIsChatShown(!isChatShown)}
+                className="grid cursor-pointer bg-[#202124] hover:bg-[#3D4143] place-content-center place-self-center w-[50px] h-[50px] rounded-full text-white"
+              >
+                <ChatLeftTextFill width={20} />
+              </button>
+            </div>
+            <div className="grid place-content-center place-self-center">
+              <ModeSwitcher />
+            </div>
+            <div className="grid lg:w-[60px] w-[40px] cursor-pointer rounded-full place-self-center overflow-hidden">
+              <Avatar className="" />
+            </div>
           </div>
         </div>
       </div>

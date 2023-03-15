@@ -11,12 +11,16 @@ export default function Camera({
   videoTrack,
   audioTrack,
   id,
+  title,
+  unpinned,
 }: {
   videoRenderRef: React.RefObject<HTMLDivElement>;
   mediaStream: MediaStream | null;
   videoTrack: boolean;
   audioTrack: boolean;
   id: string;
+  title: string;
+  unpinned: boolean;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [windowSize, setWindowSize] = useState([0, 0]);
@@ -48,7 +52,7 @@ export default function Camera({
 
   useEffect(() => {
     if (videoRef.current) {
-      videoRef.current.muted = true;
+      videoRef.current.muted = id === 'self';
     }
   });
   useEffect(() => {
@@ -57,6 +61,8 @@ export default function Camera({
       setInitialRender(true);
     }
   });
+
+  const [ifSpeaking, setIfSpeaking] = useState(false);
   return (
     <div
       className={`grid relative self-center`}
@@ -66,28 +72,47 @@ export default function Camera({
       }}
     >
       <div
-        className={`grid rounded-[10px] ${
-          videoTrack ? 'justify-center' : 'border border-gray-400 bg-gray-400'
-        } overflow-hidden`}
-        style={{
-          width: windowSize[0] + 'px',
-          height: windowSize[1] + 'px',
-        }}
+        className={`grid ${
+          videoTrack ? '' : 'border border-gray-400 bg-gray-400'
+        } overflow-hidden justify-center ${unpinned ? 'w-fit h-fit' : ''}`}
+        style={
+          unpinned
+            ? {}
+            : {
+                width: windowSize[0] + 'px',
+                height: windowSize[1] + 'px',
+              }
+        }
       >
-        <video
-          className={`-scale-x-100 -top-[1px] ${
+        <div
+          className={`${
             videoTrack &&
             mediaStream?.getTracks().find((track) => track.kind === 'video')
               ?.enabled
               ? 'block'
               : 'hidden'
-          } h-full -left-[1px] pointer-events-none`}
-          ref={videoRef}
-          id={id + '-video'}
-          onCanPlay={handleCanPlay}
-          autoPlay
-          playsInline
-        />
+          } rounded-md relative overflow-hidden ${
+            ifSpeaking ? 'border-[rgb(138,180,248)] border-[3px]' : ''
+          }`}
+        >
+          <video
+            className={`-scale-x-100 -top-[1px] h-full -left-[1px] pointer-events-none`}
+            ref={videoRef}
+            id={id + '-video'}
+            onCanPlay={handleCanPlay}
+            autoPlay
+            playsInline
+          />
+          <div
+            style={{
+              textShadow:
+                '0px 4px 3px rgba(0,0,0,0.4),0px 8px 13px rgba(0,0,0,0.1),0px 18px 23px rgba(0,0,0,0.1)',
+            }}
+            className="absolute left-[10px] bottom-[10px] text-white font-semibold text-[15px]"
+          >
+            {title}
+          </div>
+        </div>
         <AudioVisualizer
           className={
             videoTrack &&
@@ -96,6 +121,7 @@ export default function Camera({
               ? 'hidden'
               : 'block'
           }
+          setIfSpeaking={setIfSpeaking}
           audioTrack={audioTrack}
           stream={mediaStream}
         />

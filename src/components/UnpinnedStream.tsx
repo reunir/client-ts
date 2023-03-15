@@ -11,7 +11,7 @@ export default function Unpinned({
   const videoRenderRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="grid grid-flow-row">
+    <div className="grid grid-flow-row absolute left-0 h-full w-[250px]">
       {unpinnedStream ? (
         unpinnedStream.userStreams ? (
           unpinnedStream.userStreams.map((userStream, key) =>
@@ -21,8 +21,10 @@ export default function Unpinned({
                   mediaStream={userStream.stream}
                   videoTrack={userStream.videoTrack}
                   audioTrack={userStream.audioTrack}
+                  title={userStream.title}
                   videoRenderRef={videoRenderRef}
                   id={userStream.id}
+                  unpinned={true}
                 />
               </div>
             ) : (
