@@ -174,7 +174,23 @@ export default function Chat({
                             </Link>
                           </div>
                         ) : (
-                          chat.text
+                          chat.type === 'link' ? (
+                            <div>
+                            {chat.senderName} shared a link:
+                            <br />
+                            <Link
+                              to={chat.text}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              <div className="text-blue-500 underline">
+                                {chat.text}
+                              </div>
+                            </Link>
+                          </div>
+                          )
+                          :
+                          <>{chat.text}</>
                         )}
                       </div>
                       <div className="opacity-0 grid grid-flow-col place-content-center place-self-center w-max h-fit group-hover:opacity-100 text-gray-500 dark:text-gray-300 text-xs">

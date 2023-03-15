@@ -113,9 +113,9 @@ export default function Meet() {
         audioTrack={audioTrack}
         videoTrack={videoTrack}
         setIsMeetNavShown={setIsMeetNavShown}
+        sendFileModal={sendFileModal}
         className="w-full peer-hover/bottomNav:animate-meetnav absolute left-0 bottom-0 h-[70px] meetnavOut"
-      ></MeetControls>
-      {sendFileModal ? '' : ''}
+      />
     </div>
   );
 }
