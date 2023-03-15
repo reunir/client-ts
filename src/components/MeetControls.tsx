@@ -125,6 +125,7 @@ export default function MeetControls({
   };
 
   const raiseHand = async () => {
+    setOptionsModal(false);
     const req: SOCKETREQUEST = {
       data: {
         senderName: user?.firstName + ' ' + user?.lastName,
@@ -138,6 +139,7 @@ export default function MeetControls({
   };
 
   const generateWhiteBoardSession = async () => {
+    setOptionsModal(false);
     const data = {
       whiteboardId: uuid(),
       createdBy: user?.id || '',
@@ -259,8 +261,18 @@ export default function MeetControls({
         >
           <div className="grid bg-gray-300 pl-[10px] py-[10px]">Tools</div>
           <div
-            className="hover:bg-gray-200 grid gap-[4px] bg-gray-100 p-[10px] grid-cols-[auto_auto_1fr] cursor-pointer"
-            onClick={generateWhiteBoardSession}
+            className={`hover:bg-gray-200 grid gap-[4px] ${
+              meetData.admin !== user?.id
+                ? 'bg-gray-300'
+                : 'bg-gray-100 cursor-pointer'
+            } p-[10px] grid-cols-[auto_auto_1fr]`}
+            onClick={
+              meetData.admin !== user?.id
+                ? () => {
+                    generateWhiteBoardSession();
+                  }
+                : () => {}
+            }
           >
             {loading ? (
               <div className="grid w-[20px] h-[20px]">
@@ -287,10 +299,19 @@ export default function MeetControls({
             <div className="grid place-content-center">Whiteboard</div>
           </div>
           <div
-            onClick={() => {
-              setShowFileModal(true);
-            }}
-            className="hover:bg-gray-200 grid gap-[4px] bg-gray-100 p-[10px] grid-cols-[auto_auto_1fr] cursor-pointer"
+            onClick={
+              meetData.admin !== user?.id
+                ? () => {
+                    setShowFileModal(true);
+                    setOptionsModal(false);
+                  }
+                : () => {}
+            }
+            className={`hover:bg-gray-200 grid gap-[4px] ${
+              meetData.admin !== user?.id
+                ? 'bg-gray-300'
+                : 'bg-gray-100 cursor-pointer'
+            } p-[10px]`}
           >
             {loading ? (
               <div className="grid w-[20px] h-[20px]">

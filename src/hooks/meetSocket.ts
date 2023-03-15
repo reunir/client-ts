@@ -75,13 +75,14 @@ export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEv
             console.log('Successfully joined:', args);
 
             const meetDetails = args.data?.body.meetDetails
-            let meetChats = meetDetails.chatHistory;
+            let meetChatString = meetDetails.chatHistory[0] as string;
+            let meetChats = meetChatString.split()
             let finalChats: AChat[] | null = [];
             if (meetChats.length === 1 && meetChats[0] === '') {
                 finalChats = null
             } else {
                 for (let chat in meetChats) {
-                    let chatObj = JSON.parse(chat) as AChat
+                    let chatObj = JSON.parse(meetChats[chat]) as AChat
                     finalChats?.push(chatObj)
                 }
             }
@@ -156,7 +157,7 @@ export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEv
                 finalChats = null
             } else {
                 for (let chat in meetChats) {
-                    let chatObj = JSON.parse(chat) as AChat
+                    let chatObj = JSON.parse(meetChats[chat]) as AChat
                     finalChats?.push(chatObj)
                 }
             }

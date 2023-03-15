@@ -50,6 +50,7 @@ export default function Chat({
     }
   }, [participantData]);
   useEffect(() => {
+    console.log(chatHistory);
     updateChatData(chatHistory);
   }, [chatHistory]);
   const { token } = useAuth();
@@ -192,9 +193,8 @@ export default function Chat({
                               </div>
                             </Link>
                           </div>
-                        ) : (
-                          chat.type === 'link' ? (
-                            <div>
+                        ) : chat.type === 'link' ? (
+                          <div>
                             {chat.senderName} shared a link:
                             <br />
                             <Link
@@ -207,8 +207,7 @@ export default function Chat({
                               </div>
                             </Link>
                           </div>
-                          )
-                          :
+                        ) : (
                           <>{chat.text}</>
                         )}
                       </div>
