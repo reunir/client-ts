@@ -18,6 +18,8 @@ import {
 import makeRequest from '../utils/requestWrap';
 import { v4 as uuid } from 'uuid';
 import { useAuth } from '../context/auth-context';
+import { SOCKETEVENTS, SOCKETREQUEST } from '../types/Socket';
+import { Share, Whiteboard } from '@styled-icons/fluentui-system-regular';
 
 export default function MeetControls({
   className,
@@ -28,6 +30,8 @@ export default function MeetControls({
   toggleCamera,
   enableStream,
   meetData,
+  sendSocketRequest,
+  setSendFileModal,
 }: {
   className: string;
   setIsMeetNavShown: any;
@@ -37,6 +41,8 @@ export default function MeetControls({
   toggleAudio: () => void;
   enableStream: () => Promise<void>;
   meetData: MEETDATA;
+  sendSocketRequest: (event: SOCKETEVENTS, data: SOCKETREQUEST) => void;
+  setSendFileModal: any;
 }) {
   const headerFocusOut = (e: React.BaseSyntheticEvent) => {
     e.currentTarget.classList.add('meetnavOut');
@@ -59,6 +65,7 @@ export default function MeetControls({
       createdBy: user?.id || '',
       type: meetData.type,
     };
+    console.log(data);
     const {
       response,
       displaySuccessMessage,
@@ -75,13 +82,22 @@ export default function MeetControls({
     if (response.success) {
       displaySuccessMessage();
       const whiteboardId = response.data?.body.whiteboardId;
-      console.log(
-        (process.env.REACT_APP_WHITEBOARD_URL || '') +
-          whiteboardId +
-          '?token=' +
-          token
-      );
-
+      const req: SOCKETREQUEST = {
+        data: {
+          senderName: user?.firstName + ' ' + user?.lastName,
+          senderEmail: user?.email,
+          text: (process.env.REACT_APP_WHITEBOARD_URL || '') + whiteboardId,
+          inReplyTo: -1,
+          reacts: [],
+          type: 'wb-link',
+          language: 'en-US',
+          timeAndDate: new Date(),
+        },
+        meetId: meetData.meetId,
+        userId: user?.id || '',
+        type: '',
+      };
+      sendSocketRequest(SOCKETEVENTS.SEND_MESSAGE, req);
       window.open(
         (process.env.REACT_APP_WHITEBOARD_URL || '') +
           whiteboardId +
@@ -143,10 +159,11 @@ export default function MeetControls({
       </div>
       {optionsModal ? (
         <div
-          className={`grid grid-flow-row bottom-[75px] left-[850px] bg-gray-100 border-gray-500 w-fit rounded absolute`}
+          className={`grid gap-[1px] grid-flow-row bottom-[75px] left-[850px] bg-gray-300 border-gray-500 w-[200px] rounded-md overflow-hidden absolute`}
         >
+          <div className="grid bg-gray-300 pl-[10px] py-[10px]">Tools</div>
           <div
-            className="hover:bg-gray-200 p-[10px] grid grid-cols-[auto_1fr] cursor-pointer"
+            className="hover:bg-gray-200 grid gap-[4px] bg-gray-100 p-[10px] grid-cols-[auto_auto_1fr] cursor-pointer"
             onClick={generateWhiteBoardSession}
           >
             {loading ? (
@@ -170,7 +187,38 @@ export default function MeetControls({
             ) : (
               ''
             )}
-            Start Whiteboard Session
+            <Whiteboard width={30} />
+            <div className="grid place-content-center">Whiteboard</div>
+          </div>
+          <div
+            onClick={() => {
+              setSendFileModal(true);
+            }}
+            className="hover:bg-gray-200 grid gap-[4px] bg-gray-100 p-[10px] grid-cols-[auto_auto_1fr] cursor-pointer"
+          >
+            {loading ? (
+              <div className="grid w-[20px] h-[20px]">
+                <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+              </div>
+            ) : (
+              ''
+            )}
+            <Share width={30} />
+            <div className="grid place-content-center">Share File</div>
           </div>
         </div>
       ) : (

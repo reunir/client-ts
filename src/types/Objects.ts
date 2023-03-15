@@ -1,3 +1,5 @@
+import { userType } from "./User";
+
 export type SignupObject = {
     firstName: string;
     lastName: string;
@@ -9,6 +11,26 @@ export type SignupObject = {
     phone: string,
     isEmailVerified: boolean
 };
+
+export type ChatObject = {
+    allChats: AChat[] | null
+}
+
+export type AChat = {
+    senderEmail: string,
+    inReplyTo: number,
+    senderName: string,
+    text: string,
+    timeAndDate: string
+    language: string,
+    reacts: [],
+    type: string
+}
+
+
+export type ModifiedChatObject = {
+    allChats?: AChat[]
+}
 
 export enum WHICHSTREAM {
     SCREEN = 'screen',
@@ -49,11 +71,14 @@ export type SCREENMEDIAS = SCREENMEDIA[]
 export type MEETDATA = {
     participants: {
         length: number,
-        userIds: string[]
+        userIds: string[],
+        data: userType[]
     },
     type: string,
     meetId: string,
     admin: string,
+    chats: AChat[] | null
+    fileHistory: [string] | null
 }
 
 export type STREAMS = {

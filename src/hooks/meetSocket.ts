@@ -6,10 +6,10 @@ import { DefaultEventsMap } from "@socket.io/component-emitter";
 import { useNavigate } from "react-router-dom";
 import useMeetData from "./meetData";
 import Peer, { DataConnection, MediaConnection } from "peerjs";
-import { MEETDATA, PeerDataType, SCREENMEDIA, STREAMS, USERSTREAM, userType } from "../types";
+import { AChat, MEETDATA, PeerDataType, ResponseType, SCREENMEDIA, STREAMS, USERSTREAM, userType } from "../types";
 import { useAuth } from "../context/auth-context";
-
-export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEventsMap>, addNotification: any, addError: any, peerId: string, meetData: MEETDATA, streams: STREAMS, addNewScreenMedia: (newMedia: SCREENMEDIA) => void, addNewUserStream: (newMedia: USERSTREAM) => void, setMeetData: any, clearPinnedStreams: () => void, enableUserStream: () => Promise<void>) {
+import axios from "axios";
+export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEventsMap>, addNotification: any, addError: any, peerId: string, meetData: MEETDATA, streams: STREAMS, addNewScreenMedia: (newMedia: SCREENMEDIA) => void, addNewUserStream: (newMedia: USERSTREAM) => void, setMeetData: React.Dispatch<React.SetStateAction<MEETDATA>>, clearPinnedStreams: () => void, enableUserStream: () => Promise<void>) {
     const [isSocketConnected, setIsConnected] = useState(false);
     const [myPeer, setMyPeer] = useState<Peer>(new Peer(peerId, {
         host: 'localhost',
@@ -19,7 +19,39 @@ export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEv
 
     const navigate = useNavigate();
     const { user } = useAuth();
+    const getUserAvatars = async (participants: string[]) => {
+        const data: userType[] = [];
+        const pars = participants[0].split(',')
+        for (let participant in pars) {
+            console.log(pars[participant]);
+            const res = await axios.post('user/getDetails', { id: pars[participant] });
+            const userdata = res.data as ResponseType<userType>
+            if (userdata.data) {
+                data.push(userdata.data.body)
+            }
+        }
+        return data;
+    }
     function listenEvents(socket: Socket<DefaultEventsMap, DefaultEventsMap>) {
+
+        socket.on(SOCKETEVENTS.RECIEVE_MESSAGE, (args: SOCKETRESPONSE<AChat>) => {
+            console.log(args);
+            let oldchats = meetData.chats;
+            let newChat: AChat;
+            if (args.data?.body) {
+                newChat = args.data.body
+                if (oldchats) {
+                    oldchats.concat([newChat])
+                } else {
+                    oldchats = [newChat]
+                }
+                setMeetData({
+                    ...meetData,
+                    chats: oldchats
+                })
+            }
+        })
+
         socket.on(SOCKETEVENTS.SUCCESSFULL_CREATE, (args: SOCKETRESPONSE<any>) => {
             console.log(args)
             navigate(`/meet/__join/`, {
@@ -34,18 +66,32 @@ export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEv
                 }
             })
         })
-        socket.on(SOCKETEVENTS.SUCCESSFULL_JOIN, (args: SOCKETRESPONSE<any>) => {
+        socket.on(SOCKETEVENTS.SUCCESSFULL_JOIN, async (args: SOCKETRESPONSE<any>) => {
             console.log('Successfully joined:', args);
 
             const meetDetails = args.data?.body.meetDetails
+            let meetChats = meetDetails.chatHistory;
+            let finalChats: AChat[] | null = [];
+            if (meetChats.length === 1 && meetChats[0] === '') {
+                finalChats = null
+            } else {
+                for (let chat in meetChats) {
+                    let chatObj = JSON.parse(chat) as AChat
+                    finalChats?.push(chatObj)
+                }
+            }
+            const data = await getUserAvatars(meetDetails.participants)
             setMeetData({
                 participants: {
                     length: meetDetails.participantCount,
-                    userIds: meetDetails.participants
+                    userIds: meetDetails.participants,
+                    data
                 },
                 meetId: meetDetails.meetId,
                 type: meetDetails.type,
-                admin: meetDetails.admin
+                admin: meetDetails.admin,
+                chats: finalChats,
+                fileHistory: meetDetails.fileHistory
             })
             enableUserStream();
             console.log('Meeting data set');
@@ -95,19 +141,33 @@ export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEv
             })
 
         })
-        socket.on(SOCKETEVENTS.USER_JOINED, (args: SOCKETRESPONSE<any>) => {
+        socket.on(SOCKETEVENTS.USER_JOINED, async (args: SOCKETRESPONSE<any>) => {
             console.log(args.data?.body.peerId);
+            addNotification({ message: args.data?.message });
             const meetDetails = args.data?.body.meetDetails
+            let meetChats = meetDetails.chatHistory;
+            let finalChats: AChat[] | null = [];
+            if (meetChats.length === 1 && meetChats[0] === '') {
+                finalChats = null
+            } else {
+                for (let chat in meetChats) {
+                    let chatObj = JSON.parse(chat) as AChat
+                    finalChats?.push(chatObj)
+                }
+            }
+            const data = await getUserAvatars(meetDetails.participants)
             setMeetData({
                 participants: {
                     length: meetDetails.participantCount,
-                    userIds: meetDetails.participants
+                    userIds: meetDetails.participants,
+                    data
                 },
                 meetId: meetDetails.meetId,
                 type: meetDetails.type,
-                admin: meetDetails.admin
+                admin: meetDetails.admin,
+                chats: finalChats,
+                fileHistory: meetDetails.fileHistory
             })
-            addNotification({ message: args.data?.message });
             if (args.data?.body.peerId && myPeer) {
                 const req: SOCKETREQUEST = {
                     userId: user?.id || "",
@@ -145,8 +205,17 @@ export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEv
                         videoTrack: remoteStream.getTracks().find((track) => track.kind === 'video')?.enabled || false,
                         audioTrack: remoteStream.getTracks().find((track) => track.kind === 'audio')?.enabled || false,
                     }
+                    const oldStream: USERSTREAM = {
+                        title: user?.firstName + ' ' + user?.lastName || "",
+                        stream: stream,
+                        id: user?.id || "",
+                        isPinned: false,
+                        videoTrack: remoteStream.getTracks().find((track) => track.kind === 'video')?.enabled || false,
+                        audioTrack: remoteStream.getTracks().find((track) => track.kind === 'audio')?.enabled || false,
+                    }
                     console.log(newUserStream);
                     addNewUserStream(newUserStream)
+                    addNewUserStream(oldStream)
                 })
             }
         })

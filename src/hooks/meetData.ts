@@ -6,11 +6,14 @@ export default function useMeetData() {
     const tempMeetData: MEETDATA = {
         participants: {
             length: 0,
-            userIds: []
+            userIds: [],
+            data: []
         },
         meetId: "",
         type: "",
         admin: "",
+        chats: null,
+        fileHistory: null
     }
     const [meetData, setMeetData] = useState<MEETDATA>(tempMeetData);
     const tempStreams: STREAMS = {
