@@ -9,8 +9,7 @@ import Peer, { DataConnection, MediaConnection } from "peerjs";
 import { AChat, MEETDATA, PeerDataType, ResponseType, SCREENMEDIA, STREAMS, USERSTREAM, userType } from "../types";
 import { useAuth } from "../context/auth-context";
 import axios from "axios";
-
-export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEventsMap>, addNotification: any, addError: any, peerId: string, meetData: MEETDATA, streams: STREAMS, addNewScreenMedia: (newMedia: SCREENMEDIA) => void, addNewUserStream: (newMedia: USERSTREAM) => void, setMeetData: React.Dispatch<React.SetStateAction<MEETDATA>>, clearPinnedStreams: () => void, enableUserStream: () => Promise<void>) {
+export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEventsMap>, addNotification: any, addError: any, peerId: string, meetData: MEETDATA, addNewScreenMedia: (newMedia: SCREENMEDIA) => void, addNewUserStream: (newMedia: USERSTREAM) => void, setMeetData: React.Dispatch<React.SetStateAction<MEETDATA>>, clearPinnedStreams: () => void, enableUserStream: () => Promise<void>) {
     const [isSocketConnected, setIsConnected] = useState(false);
     const [myPeer, setMyPeer] = useState<Peer>(new Peer(peerId, {
         host: 'localhost',
@@ -80,13 +79,14 @@ export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEv
             console.log('Successfully joined:', args);
 
             const meetDetails = args.data?.body.meetDetails
-            let meetChats = meetDetails.chatHistory;
+            let meetChatString = meetDetails.chatHistory[0] as string;
+            let meetChats = meetChatString.split('')
             let finalChats: AChat[] | null = [];
             if (meetChats.length === 1 && meetChats[0] === '') {
                 finalChats = null
             } else {
                 for (let chat in meetChats) {
-                    let chatObj = JSON.parse(chat) as AChat
+                    let chatObj = JSON.parse(meetChats[chat]) as AChat
                     finalChats?.push(chatObj)
                 }
             }
@@ -103,7 +103,7 @@ export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEv
                 chats: finalChats,
                 fileHistory: meetDetails.fileHistory
             })
-            enableUserStream();
+            enableUserStream()
             console.log('Meeting data set');
         })
         socket.on(SOCKETEVENTS.RECEIVE_STREAM_TYPE, (args: SOCKETRESPONSE<any>) => { // recently joined user
@@ -128,12 +128,12 @@ export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEv
                     console.log(`Stream came from remote ${remoteStream.id}`);
                     if (args.data?.body.streamType === "userstream") {
                         const newUserStream: USERSTREAM = {
-                            title: '',
+                            title: args.data.body.userName,
                             stream: remoteStream,
-                            id: '',
+                            id: args.data.body.socketId,
                             isPinned: false,
-                            videoTrack: remoteStream.getTracks().find((track) => track.kind === 'video')?.enabled || false,
-                            audioTrack: remoteStream.getTracks().find((track) => track.kind === 'audio')?.enabled || false,
+                            videoTrack: remoteStream.getTracks().find((track) => track.kind === 'video')?.enabled ? true : false,
+                            audioTrack: remoteStream.getTracks().find((track) => track.kind === 'audio')?.enabled ? true : false,
                         }
                         addNewUserStream(newUserStream)
                     }
@@ -161,7 +161,7 @@ export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEv
                 finalChats = null
             } else {
                 for (let chat in meetChats) {
-                    let chatObj = JSON.parse(chat) as AChat
+                    let chatObj = JSON.parse(meetChats[chat]) as AChat
                     finalChats?.push(chatObj)
                 }
             }
@@ -178,23 +178,22 @@ export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEv
                 chats: finalChats,
                 fileHistory: meetDetails.fileHistory
             })
-            if (args.data?.body.peerId && myPeer) {
-                const req: SOCKETREQUEST = {
-                    userId: user?.id || "",
-                    meetId: '',
-                    type: '',
-                    data: {
-                        connectedSocket: args.data?.body.userSocketId,
-                        streamType: 'userstream',
-                        user: {
-                            name: user?.firstName + ' ' + user?.lastName
-                        }
+        })
+        socket.on(SOCKETEVENTS.USER_HAS_JOINED_SUCCESSFULLY, (args: SOCKETRESPONSE<any>) => {
+            const req: SOCKETREQUEST = {
+                userId: user?.id || "",
+                meetId: '',
+                type: '',
+                data: {
+                    connectedSocket: args.data?.body.socketId,
+                    streamType: 'userstream',
+                    user: {
+                        name: user?.firstName + ' ' + user?.lastName
                     }
                 }
-                socket.emit(SOCKETEVENTS.SEND_STREAM_TYPE, req);
             }
+            socket.emit(SOCKETEVENTS.SEND_STREAM_TYPE, req);
         })
-
         socket.on(SOCKETEVENTS.RECEIVE_ACK, (args: SOCKETRESPONSE<any>) => { // old user
             console.log(args);
             const videoElem = document.getElementById('self-video') as HTMLVideoElement;
@@ -202,6 +201,8 @@ export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEv
             const remotePeerCall = myPeer.call(args.data?.body.peerId, stream)
             if (remotePeerCall) {
                 remotePeerCall.on("stream", (remoteStream) => {
+                    console.log('My peer:', myPeer.id);
+
                     console.log(`Stream came from remote ${remoteStream.id}`);
                     if (meetData?.participants.length === 1) {
                         clearPinnedStreams();
@@ -212,20 +213,11 @@ export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEv
                         stream: remoteStream,
                         id: user?.id || "",
                         isPinned: false,
-                        videoTrack: remoteStream.getTracks().find((track) => track.kind === 'video')?.enabled || false,
-                        audioTrack: remoteStream.getTracks().find((track) => track.kind === 'audio')?.enabled || false,
-                    }
-                    const oldStream: USERSTREAM = {
-                        title: user?.firstName + ' ' + user?.lastName || "",
-                        stream: stream,
-                        id: user?.id || "",
-                        isPinned: false,
-                        videoTrack: remoteStream.getTracks().find((track) => track.kind === 'video')?.enabled || false,
-                        audioTrack: remoteStream.getTracks().find((track) => track.kind === 'audio')?.enabled || false,
+                        videoTrack: remoteStream.getTracks().find((track) => track.kind === 'video')?.enabled ? true : false,
+                        audioTrack: remoteStream.getTracks().find((track) => track.kind === 'audio')?.enabled ? true : false,
                     }
                     console.log(newUserStream);
                     addNewUserStream(newUserStream)
-                    addNewUserStream(oldStream)
                 })
             }
         })

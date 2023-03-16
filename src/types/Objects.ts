@@ -34,18 +34,20 @@ export type ModifiedChatObject = {
 
 export enum WHICHSTREAM {
     SCREEN = 'screen',
-    USER = 'user'
+    USER = 'user',
+    NONE = ''
 }
 
 export type PINNEDSTREAM = {
     type: WHICHSTREAM;
-    screenMedia: SCREENMEDIA | null;
-    userStream: USERSTREAM | null
+    screenMedia: SCREENMEDIAS;
+    userStream: USERSTREAMS
 }
 
 export type UNPINNEDSTREAMS = {
-    screenMedias: SCREENMEDIAS | null,
-    userStreams: USERSTREAMS | null
+    screenMedias: SCREENMEDIAS,
+    userStreams: USERSTREAMS,
+    length: number
 }
 
 export type SCREENMEDIA = {
@@ -82,8 +84,8 @@ export type MEETDATA = {
 }
 
 export type STREAMS = {
-    screenMedias: null | SCREENMEDIAS;
-    userStreams: null | USERSTREAMS;
+    screenMedias: SCREENMEDIAS;
+    userStreams: USERSTREAMS;
 }
 export type ModifiedSignupObject = {
     firstName?: string;

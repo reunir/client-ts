@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { WHICHSTREAM, UNPINNEDSTREAMS } from '../types';
 import Camera from './Camera';
+import CameraSelf from './CameraSelf';
 import ScreenShare from './ScreenShare';
 
 export default function Unpinned({
@@ -11,20 +12,31 @@ export default function Unpinned({
   const videoRenderRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="grid grid-flow-row">
+    <div className="grid grid-flow-row absolute left-0 h-full w-[250px]">
       {unpinnedStream ? (
         unpinnedStream.userStreams ? (
           unpinnedStream.userStreams.map((userStream, key) =>
             userStream ? (
-              <div ref={videoRenderRef} key={key} className="grid">
-                <Camera
+              userStream.id === 'self' ? (
+                <CameraSelf
                   mediaStream={userStream.stream}
                   videoTrack={userStream.videoTrack}
                   audioTrack={userStream.audioTrack}
                   videoRenderRef={videoRenderRef}
                   id={userStream.id}
+                  unpinned={false}
                 />
-              </div>
+              ) : (
+                <div ref={videoRenderRef} key={key} className="grid">
+                  <Camera
+                    mediaStream={userStream.stream}
+                    title={userStream.title}
+                    videoRenderRef={videoRenderRef}
+                    id={userStream.id}
+                    unpinned={true}
+                  />
+                </div>
+              )
             ) : (
               <></>
             )

@@ -23,8 +23,10 @@ export enum SOCKETEVENTS {
     RECIEVED_CAPTIONS = 'recieve_captions',
     SEND_MESSAGE = 'share_message',
     RECIEVE_MESSAGE = 'recieve_message',
-    RAISE_HAND="raise_hand",
-    HAND_RAISED="hand_raised"
+    USER_HAS_JOINED_SUCCESSFULLY = "user_has_joined_successfully",
+    I_JOINED_SUCCESSFULLY = "i_joined_successfully",
+    RAISE_HAND = "raise_hand",
+    HAND_RAISED = "hand_raised"
 }
 export interface SOCKETREQ {
     data: any,

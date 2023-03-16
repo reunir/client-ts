@@ -9,6 +9,9 @@ import { useAuth } from '../context/auth-context';
 import { ChatProvider } from '../context/chat-context';
 import useHandlePinUnpin from '../hooks/handlePinUnpin';
 import useMeetHooks from '../hooks/meetHooks';
+import useScreenCapture from '../hooks/screenCapture';
+import { useUserMedia } from '../hooks/userStream';
+import { CAPTURE_OPTIONS, SCREEN_CAPTURE_OPTIONS, WHICHSTREAM } from '../types';
 import { SOCKETEVENTS, SOCKETREQUEST } from '../types/Socket';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 
@@ -23,13 +26,13 @@ export default function Meet() {
     meetId,
     streams,
     pinnedStream,
-    unpinnedStreams,
     toggleAudio,
     enableStream,
     toggleCamera,
     audioTrack,
-    meetData,
     videoTrack,
+    unpinnedStreams,
+    meetData,
     sendSocketRequest,
     peerId,
   } = useOutletContext<any>();
@@ -96,39 +99,51 @@ export default function Meet() {
       sendSocketRequest(SOCKETEVENTS.JOIN_ROOM, req);
     }
   }, [meetId, isThisMeetVerified]);
+  const [isChatShown, setIsChatShown] = useState(false);
   return (
-    <div className="w-screen h-screen grid grid-cols-[1fr_auto] bg-slate-300">
+    <div className="w-screen h-screen overflow-hidden grid grid-cols-[1fr_auto] bg-[#3D4143]">
       <div
         id="headerHelper"
         className={`w-full max-h-fit ${
           isHeaderShown ? 'h-0' : 'h-[5px]'
         } absolute top-0 peer left-0 z-[3]`}
       ></div>
-      <Header
-        className={`peer-hover:animate-header header absolute z-[2]`}
-        isHeaderShown={isHeaderShown}
-        setIsHeaderShown={setIsHeaderShown}
-      />
       <div className="grid w-full">
         <div
-          className={`m-[10px] w-[calc(100%-20px)] grid gap-[20px] ${
-            unpinnedStreams ? 'grid-cols-[auto_1fr]' : 'grid-cols-[1fr_auto]'
+          className={`m-[10px] relative w-[calc(100%-20px)] grid gap-[20px] ${
+            pinnedStream.type != WHICHSTREAM.NONE
+              ? 'grid-cols-[1fr_auto]'
+              : 'grid-cols-[auto_1fr]'
           }`}
         >
-          <Pinned pinnedStream={pinnedStream} />
-          <Unpinned unpinnedStream={unpinnedStreams} />
+          {pinnedStream.type != WHICHSTREAM.NONE ? (
+            <Pinned pinnedStream={pinnedStream} />
+          ) : (
+            <></>
+          )}
+          {unpinnedStreams.length > 0 ? (
+            <Unpinned unpinnedStream={unpinnedStreams} />
+          ) : (
+            <></>
+          )}
         </div>
         {/* {JSON.stringify(streams)} */}
       </div>
-      <div className="grid relative">
-        <ChatProvider>
-          <Chat
-            chatHistory={meetData.chats}
-            sendSocketRequest={sendSocketRequest}
-            meetId={meetId}
-            participantData={meetData.participants.data}
-          />
-        </ChatProvider>
+      <div className="grid h-full absolute place-content-center right-[15px]">
+        {isChatShown ? (
+          <ChatProvider>
+            <Chat
+              isChatShown={isChatShown}
+              setIsChatShown={setIsChatShown}
+              chatHistory={meetData.chats}
+              sendSocketRequest={sendSocketRequest}
+              meetId={meetId}
+              participantData={meetData.participants.data}
+            />
+          </ChatProvider>
+        ) : (
+          <></>
+        )}
       </div>
       <div
         className={`w-full max-h-fit ${
@@ -136,6 +151,8 @@ export default function Meet() {
         } absolute bottom-0 peer/bottomNav left-0 z-[3]`}
       ></div>
       <MeetControls
+        isChatShown={isChatShown}
+        setIsChatShown={setIsChatShown}
         setSendFileModal={setSendFileModal}
         toggleAudio={toggleAudio}
         meetData={meetData}

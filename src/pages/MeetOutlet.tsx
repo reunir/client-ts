@@ -6,6 +6,8 @@ import { v4 as uuid } from 'uuid';
 import { SOCKETEVENTS, SOCKETREQUEST } from '../types/Socket';
 import connectSocket from '../utils/socket';
 import { useUserMedia } from '../hooks/userStream';
+// import Sound from 'react-sound';
+// import joinSound from '../assets/sounds/joinmeet.mp3';
 import {
   CAPTURE_OPTIONS,
   SCREENMEDIA,
@@ -54,7 +56,6 @@ export default function MeetOutlet() {
     addError,
     peerId,
     meetData,
-    streams,
     addNewScreenMedia,
     addNewUserStream,
     setMeetData,
@@ -64,6 +65,10 @@ export default function MeetOutlet() {
 
   const { pinnedStream, unpinnedStreams } = useHandlePinUnpin(streams);
 
+  const [ifUserStreamReady, setIfUserStreamReady] = useState(false);
+  useEffect(() => {
+    console.log(pinnedStream);
+  }, [pinnedStream]);
   useEffect(() => {
     if (id) setMeetId(id);
   }, [id]);
@@ -71,6 +76,7 @@ export default function MeetOutlet() {
   useEffect(() => {
     // for my media
     if (mediaStream) {
+      console.log(mediaStream);
       let name = '';
       if (user) {
         name = user.firstName + ' ' + user.lastName;
@@ -83,15 +89,25 @@ export default function MeetOutlet() {
         id: 'self',
         isPinned: true, // if self is present pin him
       };
-      let oldStreams = streams.userStreams;
-      if (oldStreams) {
-        oldStreams.push(selfStream);
-      } else {
-        oldStreams = [selfStream];
-      }
-      setStreams({ ...streams, userStreams: oldStreams });
+      setIfUserStreamReady(addNewUserStream(selfStream) || false);
     }
   }, [mediaStream]);
+  const [playSound, setplaySound] = useState(false);
+  useEffect(() => {
+    if (meetId) {
+      const req: SOCKETREQUEST = {
+        data: {
+          ack: true,
+          socketId: socket.id,
+        },
+        type: '',
+        userId: '',
+        meetId: meetId,
+      };
+      socket.emit(SOCKETEVENTS.I_JOINED_SUCCESSFULLY, req);
+      setplaySound(true);
+    }
+  }, [ifUserStreamReady, meetId]);
   useEffect(() => {
     // for screen share
     if (screenStream) {
