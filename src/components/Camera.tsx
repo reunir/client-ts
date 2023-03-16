@@ -1,9 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useCardRatio } from '../hooks/useRatio';
-import Measure, { ContentRect } from 'react-measure';
-import { useUserMedia } from '../hooks/userStream';
-import { CAPTURE_OPTIONS } from '../types';
-import Avatar from './Avatar';
 import AudioVisualizer from './AudioVisualizer';
 export default function Camera({
   videoRenderRef,
@@ -108,6 +103,7 @@ export default function Camera({
       >
         <div
           className={`${
+            videoTrack &&
             videoStream?.getTracks().find((track) => track.kind === 'video')
               ?.enabled
               ? 'block'

@@ -23,7 +23,6 @@ import { SOCKETEVENTS, SOCKETREQUEST } from '../types/Socket';
 import { Share, Whiteboard } from '@styled-icons/fluentui-system-regular';
 import { FileUploader } from 'react-drag-drop-files';
 import { CloudUpload, Share as ShareIcon } from '@styled-icons/boxicons-solid';
-import { Hand } from '@styled-icons/fa-solid';
 import axios from 'axios';
 import { CallEnd } from '@styled-icons/material-rounded';
 import ModeSwitcher from './ModeSwitcher';
@@ -446,7 +445,6 @@ export default function MeetControls({
             ) : (
               ''
             )}
-            <Hand width={30} />
             <div className="grid place-content-center" onClick={raiseHand}>
               Raise hand
             </div>

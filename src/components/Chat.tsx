@@ -1,6 +1,5 @@
 import { createRef, useEffect, useState } from 'react';
 import { useChat } from '../context/chat-context';
-import { Input, Button } from 'react-chat-elements';
 import dateFormat, { masks } from 'dateformat';
 import {
   generateAndReturnAvatar,

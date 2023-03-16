@@ -18,14 +18,16 @@ export default function Unpinned({
           unpinnedStream.userStreams.map((userStream, key) =>
             userStream ? (
               userStream.id === 'self' ? (
-                <CameraSelf
-                  mediaStream={userStream.stream}
-                  videoTrack={userStream.videoTrack}
-                  audioTrack={userStream.audioTrack}
-                  videoRenderRef={videoRenderRef}
-                  id={userStream.id}
-                  unpinned={false}
-                />
+                <div ref={videoRenderRef} key={key} className="grid">
+                  <CameraSelf
+                    mediaStream={userStream.stream}
+                    videoTrack={userStream.videoTrack}
+                    audioTrack={userStream.audioTrack}
+                    videoRenderRef={videoRenderRef}
+                    id={userStream.id}
+                    unpinned={false}
+                  />
+                </div>
               ) : (
                 <div ref={videoRenderRef} key={key} className="grid">
                   <Camera
