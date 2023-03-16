@@ -2032,6 +2032,11 @@
   resolved "https://registry.yarnpkg.com/@types/dateformat/-/dateformat-5.0.0.tgz#17ce64b0318f3f36d1c830c58a7a915445f1f93d"
   integrity sha512-SZg4JdHIWHQGEokbYGZSDvo5wA4TLYPXaqhigs/wH+REDOejcJzgH+qyY+HtEUtWOZxEUkbhbdYPqQDiEgrXeA==
 
+"@types/dom-speech-recognition@*":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@types/dom-speech-recognition/-/dom-speech-recognition-0.0.1.tgz#e326761a04b4a49c0eec2ac7948afc1c6aa12baa"
+  integrity sha512-udCxb8DvjcDKfk1WTBzDsxFbLgYxmQGKrE/ricoMqHRNjSlSUCcamVTA5lIQqzY10mY5qCY0QDwBfFEwhfoDPw==
+
 "@types/eslint-scope@^3.7.3":
   version "3.7.4"
   resolved "https://registry.yarnpkg.com/@types/eslint-scope/-/eslint-scope-3.7.4.tgz#37fc1223f0786c39627068a12e94d6e6fc61de16"
@@ -2209,6 +2214,13 @@
   integrity sha512-Pu4/hQ/1AKVN6efoawtcM+l376WYOI8e1fiM6ir4pdLkHilDCkJLjUGvAm0mWKJ0GE6hzu55yCrcJ/xNyEdFwA==
   dependencies:
     "@types/react" "*"
+
+"@types/react-speech-recognition@^3.9.1":
+  version "3.9.1"
+  resolved "https://registry.yarnpkg.com/@types/react-speech-recognition/-/react-speech-recognition-3.9.1.tgz#6a664bf22c54239a46e871f119494506b55bcd4c"
+  integrity sha512-9aR3BvLMgO9M+dKueOd5TK5UwGm/0wqnykGHD2irTsSf0sGUMk19q4nmjVNeVMLDBfuLfR8o0rj5WvMv5Fje/Q==
+  dependencies:
+    "@types/dom-speech-recognition" "*"
 
 "@types/react@*", "@types/react@^18.0.0":
   version "18.0.28"
@@ -8075,6 +8087,11 @@ react-scripts@5.0.1:
     workbox-webpack-plugin "^6.4.1"
   optionalDependencies:
     fsevents "^2.3.2"
+
+react-speech-recognition@^3.10.0:
+  version "3.10.0"
+  resolved "https://registry.yarnpkg.com/react-speech-recognition/-/react-speech-recognition-3.10.0.tgz#7aa43bb28d78b92671864dabba3a70489ccad27b"
+  integrity sha512-EVSr4Ik8l9urwdPiK2r0+ADrLyDDrjB0qBRdUWO+w2MfwEBrj6NuRmy1GD3x7BU/V6/hab0pl8Lupen0zwlJyw==
 
 react-spinkit@^3.0.0:
   version "3.0.0"

@@ -10,11 +10,13 @@ import { ChatProvider } from '../context/chat-context';
 import useHandlePinUnpin from '../hooks/handlePinUnpin';
 import useMeetHooks from '../hooks/meetHooks';
 import { SOCKETEVENTS, SOCKETREQUEST } from '../types/Socket';
+import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 
 export default function Meet() {
   const [isHeaderShown, setIsHeaderShown] = useState<boolean>(false);
   const [isMeetNavShown, setIsMeetNavShown] = useState<boolean>(false);
   const { user } = useAuth();
+
   const {
     setIsThisMeetVerified,
     isThisMeetVerified,
@@ -34,9 +36,39 @@ export default function Meet() {
   const location = useLocation();
   const navigate = useNavigate();
   const [sendFileModal, setSendFileModal] = useState(false);
+
+  const {
+    transcript,
+    finalTranscript,
+    listening,
+    resetTranscript,
+    browserSupportsSpeechRecognition
+  } = useSpeechRecognition();
+
+  useEffect(() => {
+    resetTranscript();
+    console.log("new transcript", transcript)
+    // if (finalTranscript != "") {
+    //   const req: SOCKETREQUEST = {
+    //     userId: user!.id,
+    //     meetId: meetId,
+    //     type: '',
+    //     data: {
+    //       caption: finalTranscript,
+    //       username: user?.firstName + " " + user?.lastName
+    //     }
+    //   }
+    //   sendSocketRequest(SOCKETEVENTS.SEND_CAPTIONS, req);
+    // }
+  }, [transcript])
+
   useEffect(() => {
     // addError({ status: false, error: { message: 'Temporary Error!' } });
     // addNotification({ message: 'This is sample message!' });
+
+    
+    SpeechRecognition.startListening({ continuous: true });
+
     if (location.state) {
       if (location.state.meetVerified) {
         setIsThisMeetVerified(true);

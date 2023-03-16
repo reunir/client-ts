@@ -9,6 +9,7 @@ import Peer, { DataConnection, MediaConnection } from "peerjs";
 import { AChat, MEETDATA, PeerDataType, ResponseType, SCREENMEDIA, STREAMS, USERSTREAM, userType } from "../types";
 import { useAuth } from "../context/auth-context";
 import axios from "axios";
+
 export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEventsMap>, addNotification: any, addError: any, peerId: string, meetData: MEETDATA, streams: STREAMS, addNewScreenMedia: (newMedia: SCREENMEDIA) => void, addNewUserStream: (newMedia: USERSTREAM) => void, setMeetData: React.Dispatch<React.SetStateAction<MEETDATA>>, clearPinnedStreams: () => void, enableUserStream: () => Promise<void>) {
     const [isSocketConnected, setIsConnected] = useState(false);
     const [myPeer, setMyPeer] = useState<Peer>(new Peer(peerId, {
@@ -33,6 +34,10 @@ export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEv
         return data;
     }
     function listenEvents(socket: Socket<DefaultEventsMap, DefaultEventsMap>) {
+
+        socket.on(SOCKETEVENTS.RECIEVED_CAPTIONS, (args: SOCKETRESPONSE<any>) => {
+            console.log("Captions: ", args.data)
+        })
 
         socket.on(SOCKETEVENTS.HAND_RAISED, (args: SOCKETRESPONSE<any>) => {
             console.log(args)
