@@ -1,6 +1,5 @@
 import { Close } from '@styled-icons/ionicons-sharp';
 import { NotificationObject } from '../types';
-
 export default function NotificationHandler({
   notification,
   deleteAfterExpiryTime,

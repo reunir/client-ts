@@ -49,6 +49,7 @@ export default function Chat({
     }
   }, [participantData]);
   useEffect(() => {
+    console.log(chatHistory);
     updateChatData(chatHistory);
   }, [chatHistory]);
   const { token } = useAuth();

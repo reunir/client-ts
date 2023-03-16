@@ -90,6 +90,7 @@ export default function MeetOutlet() {
       setIfUserStreamReady(addNewUserStream(selfStream) || false);
     }
   }, [mediaStream]);
+  const [playSound, setplaySound] = useState(false);
   useEffect(() => {
     if (meetId) {
       const req: SOCKETREQUEST = {
@@ -102,6 +103,7 @@ export default function MeetOutlet() {
         meetId: meetId,
       };
       socket.emit(SOCKETEVENTS.I_JOINED_SUCCESSFULLY, req);
+      setplaySound(true);
     }
   }, [ifUserStreamReady, meetId]);
   useEffect(() => {
