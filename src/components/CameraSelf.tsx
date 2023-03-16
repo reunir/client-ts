@@ -3,30 +3,21 @@ import AudioVisualizer from './AudioVisualizer';
 export default function Camera({
   videoRenderRef,
   mediaStream,
+  videoTrack,
+  audioTrack,
   id,
-  title,
   unpinned,
 }: {
   videoRenderRef: React.RefObject<HTMLDivElement>;
   mediaStream: MediaStream | null;
+  videoTrack: boolean;
+  audioTrack: boolean;
   id: string;
-  title: string;
   unpinned: boolean;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [windowSize, setWindowSize] = useState([0, 0]);
   const [initialRender, setInitialRender] = useState(false);
-  const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
-  const [videoTrack, setVideoTrack] = useState(
-    mediaStream?.getTracks().find((track) => track.kind === 'video')?.enabled
-      ? true
-      : false
-  );
-  const [audioTrack, setAudioTrack] = useState(
-    mediaStream?.getTracks().find((track) => track.kind === 'audio')?.enabled
-      ? true
-      : false
-  );
   function cameraDismount() {
     if (videoRef.current && videoRef.current.srcObject) {
       videoRef.current.srcObject = null;
@@ -54,31 +45,15 @@ export default function Camera({
 
   useEffect(() => {
     if (videoRef.current) {
-      videoRef.current.muted = false;
+      videoRef.current.muted = true;
     }
   });
   useEffect(() => {
     if (mediaStream && videoRef.current && !videoRef.current.srcObject) {
       videoRef.current.srcObject = mediaStream;
-      setVideoStream(videoRef.current.srcObject);
       setInitialRender(true);
     }
   });
-  useEffect(() => {
-    if (videoStream) {
-      console.log(videoStream);
-      setVideoTrack(
-        videoStream.getTracks().find((track) => track.kind === 'video')?.enabled
-          ? true
-          : false
-      );
-      setAudioTrack(
-        videoStream.getTracks().find((track) => track.kind === 'audio')?.enabled
-          ? true
-          : false
-      );
-    }
-  }, [videoStream]);
   const [ifSpeaking, setIfSpeaking] = useState(false);
   return (
     <div
@@ -103,8 +78,7 @@ export default function Camera({
       >
         <div
           className={`${
-            videoTrack &&
-            videoStream?.getTracks().find((track) => track.kind === 'video')
+            mediaStream?.getTracks().find((track) => track.kind === 'video')
               ?.enabled
               ? 'block'
               : 'hidden'
@@ -127,20 +101,20 @@ export default function Camera({
             }}
             className="absolute left-[10px] bottom-[10px] text-white font-semibold text-[15px]"
           >
-            {title}
+            You
           </div>
         </div>
         <AudioVisualizer
           className={
             videoTrack &&
-            videoStream?.getTracks().find((track) => track.kind === 'video')
+            mediaStream?.getTracks().find((track) => track.kind === 'video')
               ?.enabled
               ? 'hidden'
               : 'block'
           }
           setIfSpeaking={setIfSpeaking}
           audioTrack={audioTrack}
-          stream={videoStream}
+          stream={mediaStream}
         />
       </div>
     </div>

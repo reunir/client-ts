@@ -34,6 +34,11 @@ export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEv
     }
     function listenEvents(socket: Socket<DefaultEventsMap, DefaultEventsMap>) {
 
+        socket.on(SOCKETEVENTS.HAND_RAISED, (args: SOCKETRESPONSE<any>) => {
+            console.log(args)
+            addNotification({ message: args.data?.body.message })
+        })
+
         socket.on(SOCKETEVENTS.RECIEVE_MESSAGE, (args: SOCKETRESPONSE<AChat>) => {
             console.log(args);
             let oldchats = meetData.chats;
@@ -70,14 +75,19 @@ export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEv
             console.log('Successfully joined:', args);
 
             const meetDetails = args.data?.body.meetDetails
-            let meetChats = meetDetails.chatHistory;
+            let meetChatString = meetDetails.chatHistory[0] as string;
+            let meetChats = meetChatString.split(';')
+            console.log(meetChats);
             let finalChats: AChat[] | null = [];
             if (meetChats.length === 1 && meetChats[0] === '') {
                 finalChats = null
             } else {
                 for (let chat in meetChats) {
-                    let chatObj = JSON.parse(chat) as AChat
-                    finalChats?.push(chatObj)
+                    if (meetChats[chat] != '') {
+                        let chatObj = JSON.parse(atob(meetChats[chat])) as AChat
+                        console.log(chatObj)
+                        finalChats?.push(chatObj)
+                    }
                 }
             }
             const data = await getUserAvatars(meetDetails.participants)
@@ -145,14 +155,19 @@ export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEv
             console.log(args.data?.body.peerId);
             addNotification({ message: args.data?.message });
             const meetDetails = args.data?.body.meetDetails
-            let meetChats = meetDetails.chatHistory;
+            let meetChatString = meetDetails.chatHistory[0] as string;
+            let meetChats = meetChatString.split(';')
+            console.log(meetChats);
             let finalChats: AChat[] | null = [];
             if (meetChats.length === 1 && meetChats[0] === '') {
                 finalChats = null
             } else {
                 for (let chat in meetChats) {
-                    let chatObj = JSON.parse(chat) as AChat
-                    finalChats?.push(chatObj)
+                    if (meetChats[chat] != '') {
+                        let chatObj = JSON.parse(meetChats[chat]) as AChat
+                        console.log(chatObj)
+                        finalChats?.push(chatObj)
+                    }
                 }
             }
             const data = await getUserAvatars(meetDetails.participants)
