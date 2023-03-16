@@ -6,8 +6,6 @@ import { v4 as uuid } from 'uuid';
 import { SOCKETEVENTS, SOCKETREQUEST } from '../types/Socket';
 import connectSocket from '../utils/socket';
 import { useUserMedia } from '../hooks/userStream';
-import Sound from 'react-sound';
-import joinSound from '../assets/sounds/joinmeet.mp3';
 import {
   CAPTURE_OPTIONS,
   SCREENMEDIA,
@@ -150,16 +148,6 @@ export default function MeetOutlet() {
 
   return (
     <>
-      {playSound ? (
-        <Sound
-          url={joinSound}
-          playStatus={Sound.status.PLAYING}
-          playFromPosition={0}
-          onFinishedPlaying={() => setplaySound(false)}
-        />
-      ) : (
-        <></>
-      )}
       <Outlet
         context={{
           meetId,

@@ -1,7 +1,5 @@
 import { Close } from '@styled-icons/ionicons-sharp';
 import { NotificationObject } from '../types';
-import Sound from 'react-sound';
-import notiSound from '../assets/sounds/notification.mp3';
 export default function NotificationHandler({
   notification,
   deleteAfterExpiryTime,
@@ -29,13 +27,6 @@ export default function NotificationHandler({
                   onClick={() => {
                     deleteError(data.timeOutId, data.arrayIndex);
                   }}
-                />
-              </div>
-              <div className="hidden opacity-0 w-0 h-0">
-                <Sound
-                  url={notiSound}
-                  playStatus={Sound.status.PLAYING}
-                  playFromPosition={0}
                 />
               </div>
             </div>
