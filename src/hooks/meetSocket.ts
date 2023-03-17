@@ -21,6 +21,7 @@ export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEv
     const { user } = useAuth();
     const getUserAvatars = async (participants: string[]) => {
         const data: userType[] = [];
+        console.log(participants[0]);
         const pars = participants[0].split(',')
         for (let participant in pars) {
             console.log(pars[participant]);
@@ -75,11 +76,14 @@ export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEv
             console.log('Successfully joined:', args);
 
             const meetDetails = args.data?.body.meetDetails
+
             let meetChatString = meetDetails.chatHistory[0] as string;
-            let meetChats = meetChatString.split(';')
-            console.log(meetChats);
+            console.log(meetChatString);
+            let meetChats: any = [];
+            if (meetChatString)
+                meetChats = meetChatString.split(';')
             let finalChats: AChat[] | null = [];
-            if (meetChats.length === 1 && meetChats[0] === '') {
+            if (!meetChats) {
                 finalChats = null
             } else {
                 for (let chat in meetChats) {
@@ -90,6 +94,8 @@ export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEv
                     }
                 }
             }
+            console.log(meetDetails.participants);
+
             const data = await getUserAvatars(meetDetails.participants)
             setMeetData({
                 participants: {

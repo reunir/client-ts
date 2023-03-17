@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 import { PINNEDSTREAM, WHICHSTREAM } from '../types';
-import CameraSelf from './CameraSelf';
 import Camera from './Camera';
 import CameraSelf from './CameraSelf';
 import ScreenShare from './ScreenShare';

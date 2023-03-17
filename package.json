@@ -6,6 +6,7 @@
     "@crello/react-lottie": "^0.0.11",
     "@headlessui/react": "^1.7.13",
     "@react-oauth/google": "^0.8.0",
+    "@socket.io/component-emitter": "^4.0.0",
     "@styled-icons/bootstrap": "^10.47.0",
     "@styled-icons/boxicons-solid": "^10.47.0",
     "@styled-icons/fa-brands": "^10.47.0",
