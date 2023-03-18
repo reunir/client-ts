@@ -73,6 +73,8 @@ function ChatProvider(props: AppProp) {
   };
   const updateChatData = (updatedObject: [AChat]) => {
     const allChats = chatData.allChats;
+    console.log(allChats);
+    console.log(updatedObject);
     if (allChats) {
       allChats.push(...updatedObject);
       setchatData({ allChats: allChats });
