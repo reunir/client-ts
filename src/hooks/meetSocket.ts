@@ -80,14 +80,18 @@ export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEv
 
             const meetDetails = args.data?.body.meetDetails
             let meetChatString = meetDetails.chatHistory[0] as string;
-            let meetChats = meetChatString.split('')
+            let meetChats = meetChatString.split(';')
+            console.log(meetChats);
             let finalChats: AChat[] | null = [];
             if (meetChats.length === 1 && meetChats[0] === '') {
                 finalChats = null
             } else {
                 for (let chat in meetChats) {
-                    let chatObj = JSON.parse(meetChats[chat]) as AChat
-                    finalChats?.push(chatObj)
+                    if (meetChats[chat] != '') {
+                        let chatObj = JSON.parse(atob(meetChats[chat])) as AChat
+                        console.log(chatObj)
+                        finalChats?.push(chatObj)
+                    }
                 }
             }
             const data = await getUserAvatars(meetDetails.participants)
@@ -155,14 +159,19 @@ export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEv
             console.log(args.data?.body.peerId);
             addNotification({ message: args.data?.message });
             const meetDetails = args.data?.body.meetDetails
-            let meetChats = meetDetails.chatHistory;
+            let meetChatString = meetDetails.chatHistory[0] as string;
+            let meetChats = meetChatString.split(';')
+            console.log(meetChats);
             let finalChats: AChat[] | null = [];
             if (meetChats.length === 1 && meetChats[0] === '') {
                 finalChats = null
             } else {
                 for (let chat in meetChats) {
-                    let chatObj = JSON.parse(meetChats[chat]) as AChat
-                    finalChats?.push(chatObj)
+                    if (meetChats[chat] != '') {
+                        let chatObj = JSON.parse(atob(meetChats[chat])) as AChat
+                        console.log(chatObj)
+                        finalChats?.push(chatObj)
+                    }
                 }
             }
             const data = await getUserAvatars(meetDetails.participants)
