@@ -155,6 +155,7 @@ export default function MeetControls({
       METHOD.POST,
       'whiteboard/create',
       data,
+      {},
       addError,
       setLoading
     );

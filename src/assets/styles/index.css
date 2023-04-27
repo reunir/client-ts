@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    --tw-gradient-stops: #ff0000 0%, #000 100%;
+  }
+}
+
 @font-face {
   font-family: 'Inter';
   src: local('Inter'),

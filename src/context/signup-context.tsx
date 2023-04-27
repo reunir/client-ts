@@ -1,4 +1,10 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import {
+  ReactNode,
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import { AppProp, SignupObject, ModifiedSignupObject } from '../types';
 
 type signupContextType = {
@@ -10,6 +16,10 @@ type signupContextType = {
   isNextDisabled: boolean;
   updateIsNextDisabled: (bool: boolean) => void;
   updateFormData: (updatedObject: ModifiedSignupObject) => void;
+  updateModalElement: (element: ReactNode) => void;
+  updateModalShown: (what: boolean) => void;
+  modalShown: boolean;
+  modalElement: ReactNode;
 };
 
 const formDefaultData: SignupObject = {
@@ -33,6 +43,10 @@ const signupContextDefaultValues: signupContextType = {
   isNextDisabled: true,
   updateIsNextDisabled: (bool: boolean) => {},
   updateFormData: (updatedObject: ModifiedSignupObject) => {},
+  updateModalElement: (element: ReactNode) => {},
+  updateModalShown: (what: boolean) => {},
+  modalShown: false,
+  modalElement: undefined,
 };
 export const SignupContext = createContext<signupContextType>(
   signupContextDefaultValues
@@ -40,18 +54,31 @@ export const SignupContext = createContext<signupContextType>(
 SignupContext.displayName = 'SignupContext';
 
 function SignupProvider(props: AppProp) {
-  const partTitles = ['Your Profile', 'Accept terms and conditions'];
+  const partTitles = [
+    'Your Profile',
+    'Setup face authentication',
+    'Setup voice authentication',
+    'Accept terms and conditions',
+  ];
   const [formData, setFormData] = useState<SignupObject>(formDefaultData);
+  const [modalElement, setModalElement] = useState<ReactNode>();
+  const updateModalElement = (element: ReactNode) => {
+    setModalElement(element);
+  };
+  const [modalShown, setModalShown] = useState(false);
+  const updateModalShown = (what: boolean) => {
+    setModalShown(what);
+  };
   const [whichPart, setwhichPart] = useState<number>(0);
   const [partTitle, setPartTitle] = useState<string>(partTitles[whichPart]);
   const [percentageCompleted, setpercentageCompleted] = useState<number>(
-    Math.floor((whichPart / 2) * 100)
+    Math.floor((whichPart / 4) * 100)
   );
   const [isNextDisabled, setisNextDisabled] = useState<boolean>(true);
   const updatePart = (part: number) => {
     setwhichPart(part);
     setPartTitle(partTitles[part]);
-    setpercentageCompleted(Math.floor((part / 2) * 100));
+    setpercentageCompleted(Math.floor((part / 4) * 100));
   };
   const updateFormData = (updatedObject: ModifiedSignupObject) => {
     setFormData({ ...formData, ...updatedObject });
@@ -84,6 +111,10 @@ function SignupProvider(props: AppProp) {
         partTitle,
         isNextDisabled,
         updateIsNextDisabled,
+        updateModalShown,
+        updateModalElement,
+        modalShown,
+        modalElement,
       }}
       {...props}
     ></SignupContext.Provider>

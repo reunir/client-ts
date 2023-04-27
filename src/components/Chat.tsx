@@ -120,7 +120,7 @@ export default function Chat({
     setChats(chatData.allChats);
   }, [chatData]);
   return (
-    <div className="w-[400px] relative grid grid-rows-[auto_1fr_auto] h-[750px] self-center border rounded-md bg-white border-gray-400">
+    <div className="w-[400px] relative z-[10] grid grid-rows-[auto_1fr_auto] h-[750px] self-center border rounded-md bg-white border-gray-400">
       <div className="w-full h-[80px] grid top-0 left-0">
         <div className="grid w-auto h-auto m-[10px]">
           <div className="grid font-semibold text-xl self-center pl-[20px] text-gray-800">

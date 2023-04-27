@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import AudioVisualizer from './AudioVisualizer';
+import AudioVisualizer from '../../AudioVisualizer';
 export default function Camera({
   videoRenderRef,
   mediaStream,
@@ -84,22 +84,14 @@ export default function Camera({
     <div
       className={`grid relative self-center`}
       style={{
-        width: windowSize[0] + 'px',
-        height: windowSize[1] + 'px',
+        width: '250px',
+        height: '100px',
       }}
     >
       <div
         className={`grid ${
           videoTrack ? '' : 'border border-gray-400 bg-gray-400'
-        } overflow-hidden justify-center ${unpinned ? 'w-fit h-fit' : ''}`}
-        style={
-          unpinned
-            ? {}
-            : {
-                width: windowSize[0] + 'px',
-                height: windowSize[1] + 'px',
-              }
-        }
+        } overflow-hidden justify-center w-fit h-fit`}
       >
         <div
           className={`${

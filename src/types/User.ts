@@ -24,6 +24,14 @@ export const CAPTURE_OPTIONS: StreamOptions = {
     audio: true,
     video: true,
 };
+export const AUDIO_CAPTURE_OPTIONS: StreamOptions = {
+    audio: true,
+    video: false,
+};
+export const VIDEO_CAPTURE_OPTIONS: StreamOptions = {
+    audio: false,
+    video: true,
+};
 
 export enum TEMPLATETYPE {
     VERIFY = 'VERIFY',

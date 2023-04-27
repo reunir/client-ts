@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { PINNEDSTREAM, WHICHSTREAM } from '../types';
-import Camera from './Camera';
-import CameraSelf from './CameraSelf';
+import Camera from './Cameras/Pinned/Camera';
+import CameraSelf from './Cameras/Pinned/CameraSelf';
 import ScreenShare from './ScreenShare';
 
 export default function Pinned({

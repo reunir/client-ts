@@ -109,6 +109,7 @@ export default function YourProfile() {
         email: formData.email,
         type: TEMPLATETYPE.VERIFY,
       },
+      {},
       addError,
       setButtonLoading
     );
@@ -133,6 +134,7 @@ export default function YourProfile() {
         otp: userOtp,
         check: formData.email,
       },
+      {},
       addError,
       sendOTPButtonLoading
     );

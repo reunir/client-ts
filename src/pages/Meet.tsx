@@ -68,6 +68,7 @@ export default function Meet() {
     }
   }, [meetId, isThisMeetVerified]);
   const [isChatShown, setIsChatShown] = useState(false);
+
   return (
     <div className="w-screen h-screen overflow-hidden grid grid-cols-[1fr_auto] bg-[#3D4143]">
       <div

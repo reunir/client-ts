@@ -4,6 +4,8 @@ import joinMeet from '../assets/joinanim.json';
 import Avatar from '../components/Avatar';
 import DateTime from './DateTime';
 import NewMeetForm from './NewMeetForm';
+import bgimg from '../assets/reunir-joinmeet.png';
+import SlideShow from '../components/Slideshow/Slideshow';
 export default function JoinMeet() {
   const defaultOptions = {
     loop: true,
@@ -15,16 +17,15 @@ export default function JoinMeet() {
   };
   const { isSocketConnected, sendSocketRequest } = useOutletContext<any>();
   return (
-    <div className="grid h-screen w-screen bg-slate-100 grid-rows-[1fr_11fr]">
-      <div className="grid grid-cols-[4fr_5fr_4fr] shadow">
-        <div className="grid place-content-center text-[#C277E0] font-bold text-5xl">
+    <div className="grid h-screen w-screen grid-rows-[1fr_11fr]">
+      <div className="grid grid-cols-[4fr_8fr_4fr] bg-[#202124] shadow">
+        <div className="grid ml-[20px] content-center text-white font-bold text-3xl">
           reunir
         </div>
         <div></div>
-        <div className="grid grid-cols-[2fr_1fr_1fr]">
+        <div className="grid grid-cols-[5.5fr_1fr]">
           <DateTime />
-          <div></div>
-          <div className="grid w-[60px] h-[60px] place-self-center overflow-hidden rounded-full">
+          <div className="grid w-[45px] mr-[20px] h-[45px] justify-self-end self-center overflow-hidden rounded-full">
             <Avatar className="" />
           </div>
         </div>
@@ -34,11 +35,8 @@ export default function JoinMeet() {
           isSocketConnected={isSocketConnected}
           sendSocketRequest={sendSocketRequest}
         />
-        <div className="grid content-center justify-end">
-          <Lottie
-            config={defaultOptions}
-            style={{ placeSelf: 'center', cursor: 'default', width: '80%' }}
-          />
+        <div className="grid">
+          <SlideShow />
         </div>
       </div>
     </div>

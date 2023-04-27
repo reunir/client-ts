@@ -130,21 +130,21 @@ export default function MeetOutlet() {
     }
   }, [screenStream]);
 
-  useEffect(() => {
-    return function cleanup() {
-      console.log('cleanup');
-      if (user && meetId) {
-        const req: SOCKETREQUEST = {
-          userId: user.id,
-          meetId: meetId,
-          type: '',
-          data: '',
-          peerId: peerId,
-        };
-        sendSocketRequest(SOCKETEVENTS.LEAVE_ROOM, req);
-      }
-    };
-  }, []);
+  // useEffect(() => {
+  //   return function cleanup() {
+  //     console.log('cleanup');
+  //     if (user && meetId) {
+  //       const req: SOCKETREQUEST = {
+  //         userId: user.id,
+  //         meetId: meetId,
+  //         type: '',
+  //         data: '',
+  //         peerId: peerId,
+  //       };
+  //       sendSocketRequest(SOCKETEVENTS.LEAVE_ROOM, req);
+  //     }
+  //   };
+  // }, []);
 
   return (
     <>
