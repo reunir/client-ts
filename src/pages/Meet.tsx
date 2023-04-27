@@ -13,6 +13,9 @@ import useScreenCapture from '../hooks/screenCapture';
 import { useUserMedia } from '../hooks/userStream';
 import { CAPTURE_OPTIONS, SCREEN_CAPTURE_OPTIONS, WHICHSTREAM } from '../types';
 import { SOCKETEVENTS, SOCKETREQUEST } from '../types/Socket';
+import SpeechRecognition, {
+  useSpeechRecognition,
+} from 'react-speech-recognition';
 
 export default function Meet() {
   const [isHeaderShown, setIsHeaderShown] = useState<boolean>(false);
@@ -37,9 +40,60 @@ export default function Meet() {
   const location = useLocation();
   const navigate = useNavigate();
   const [sendFileModal, setSendFileModal] = useState(false);
+
+  const {
+    transcript,
+    listening,
+    finalTranscript,
+    resetTranscript,
+    browserSupportsSpeechRecognition,
+  } = useSpeechRecognition();
+
+  const startListening = () =>
+    SpeechRecognition.startListening({ continuous: true });
+
+  function setSpeech() {
+    return new Promise(function (resolve, reject) {
+      let synth = window.speechSynthesis;
+      let id: any;
+
+      id = setInterval(() => {
+        if (synth.getVoices().length !== 0) {
+          resolve(synth.getVoices());
+          clearInterval(id);
+        }
+      }, 10);
+    });
+  }
+
+  function getSpeeches() {
+    let s = setSpeech();
+    s.then((voices: any) => {
+      let speakData = new window.SpeechSynthesisUtterance();
+      speakData.volume = 1;
+      speakData.rate = 1;
+      speakData.pitch = 2;
+      speakData.lang = 'en';
+      speakData.text = 'Welcome to Meet';
+      speakData.voice = voices[0];
+      window.speechSynthesis.speak(speakData);
+    });
+  }
+
+  function speak() {}
+
+  useEffect(() => {
+    console.log(finalTranscript);
+  }, [finalTranscript]);
+
   useEffect(() => {
     // addError({ status: false, error: { message: 'Temporary Error!' } });
     // addNotification({ message: 'This is sample message!' });
+    startListening();
+    getSpeeches();
+    setTimeout(() => {
+      console.log('Available voices', window.speechSynthesis.getVoices());
+    }, 2000);
     if (location.state) {
       if (location.state.meetVerified) {
         setIsThisMeetVerified(true);
