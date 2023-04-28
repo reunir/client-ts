@@ -6,17 +6,16 @@ import { DefaultEventsMap } from "@socket.io/component-emitter";
 import { useNavigate } from "react-router-dom";
 import useMeetData from "./meetData";
 import Peer, { DataConnection, MediaConnection } from "peerjs";
-import { AChat, MEETDATA, PeerDataType, ResponseType, SCREENMEDIA, STREAMS, USERSTREAM, userType } from "../types";
+import { AChat, CAPTION, CAPTIONS, MEETDATA, PeerDataType, ResponseType, SCREENMEDIA, STREAMS, USERSTREAM, VIOLATIONBODY, userType } from "../types";
 import { useAuth } from "../context/auth-context";
 import axios from "axios";
-export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEventsMap>, addNotification: any, addError: any, peerId: string, meetData: MEETDATA, addNewScreenMedia: (newMedia: SCREENMEDIA) => void, addNewUserStream: (newMedia: USERSTREAM) => void, setMeetData: React.Dispatch<React.SetStateAction<MEETDATA>>, clearPinnedStreams: () => void, enableUserStream: () => Promise<void>) {
+export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEventsMap>, addNotification: any, addError: any, peerId: string, meetData: MEETDATA, addNewScreenMedia: (newMedia: SCREENMEDIA) => void, addNewUserStream: (newMedia: USERSTREAM) => void, setMeetData: React.Dispatch<React.SetStateAction<MEETDATA>>, clearPinnedStreams: () => void, enableUserStream: () => Promise<void>, captions: CAPTIONS, updateCaptions: (newCaption: CAPTION) => void, toggleAudio: () => void) {
     const [isSocketConnected, setIsConnected] = useState(false);
     const [myPeer, setMyPeer] = useState<Peer>(new Peer(peerId, {
         host: 'localhost',
         port: 9000,
         path: '/',
     }))
-
     const navigate = useNavigate();
     const { user } = useAuth();
     const getUserAvatars = async (participants: string[]) => {
@@ -222,7 +221,7 @@ export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEv
                     const newUserStream: USERSTREAM = {
                         title: user?.firstName + ' ' + user?.lastName || "",
                         stream: remoteStream,
-                        id: user?.id || "",
+                        id: args.data?.body.from,
                         isPinned: false,
                         videoTrack: remoteStream.getTracks().find((track) => track.kind === 'video')?.enabled ? true : false,
                         audioTrack: remoteStream.getTracks().find((track) => track.kind === 'audio')?.enabled ? true : false,
@@ -232,7 +231,16 @@ export default function useMeetSocket(socket: Socket<DefaultEventsMap, DefaultEv
                 })
             }
         })
+        socket.on(SOCKETEVENTS.RECIEVED_CAPTIONS, (args: SOCKETRESPONSE<CAPTION>) => {
+            if (args.data) {
+                updateCaptions(args.data.body)
+            }
+        })
+        socket.on(SOCKETEVENTS.ADMIN_SAY_TURN_MIC_ON, (args: SOCKETRESPONSE<any>) => {
+            console.log("Audio Toggled by admin!");
 
+            toggleAudio()
+        })
     }
 
     function sendSocketRequest(event: SOCKETEVENTS, data: SOCKETREQUEST) {

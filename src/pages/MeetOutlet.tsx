@@ -47,6 +47,8 @@ export default function MeetOutlet() {
     deleteScreenMedia,
     deleteUserStream,
     clearPinnedStreams,
+    captions,
+    updateCaptions,
   } = useMeetData();
   const { isSocketConnected, sendSocketRequest } = useMeetSocket(
     socket,
@@ -58,7 +60,10 @@ export default function MeetOutlet() {
     addNewUserStream,
     setMeetData,
     clearPinnedStreams,
-    enableUserStream
+    enableUserStream,
+    captions,
+    updateCaptions,
+    toggleAudio
   );
 
   const { pinnedStream, unpinnedStreams } = useHandlePinUnpin(streams);
@@ -173,6 +178,8 @@ export default function MeetOutlet() {
           addNewUserStream,
           peerId,
           enableUserStream,
+          captions,
+          updateCaptions,
         }}
       />
     </>

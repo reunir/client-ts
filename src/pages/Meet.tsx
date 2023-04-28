@@ -11,11 +11,17 @@ import useHandlePinUnpin from '../hooks/handlePinUnpin';
 import useMeetHooks from '../hooks/meetHooks';
 import useScreenCapture from '../hooks/screenCapture';
 import { useUserMedia } from '../hooks/userStream';
-import { CAPTURE_OPTIONS, SCREEN_CAPTURE_OPTIONS, WHICHSTREAM } from '../types';
+import {
+  CAPTION,
+  CAPTURE_OPTIONS,
+  SCREEN_CAPTURE_OPTIONS,
+  WHICHSTREAM,
+} from '../types';
 import { SOCKETEVENTS, SOCKETREQUEST } from '../types/Socket';
 import SpeechRecognition, {
   useSpeechRecognition,
 } from 'react-speech-recognition';
+import Captions from '../components/Captions';
 
 export default function Meet() {
   const [isHeaderShown, setIsHeaderShown] = useState<boolean>(false);
@@ -36,6 +42,8 @@ export default function Meet() {
     meetData,
     sendSocketRequest,
     peerId,
+    captions,
+    updateCaptions,
   } = useOutletContext<any>();
   const location = useLocation();
   const navigate = useNavigate();
@@ -52,51 +60,67 @@ export default function Meet() {
   const startListening = () =>
     SpeechRecognition.startListening({ continuous: true });
 
-  function setSpeech() {
-    return new Promise(function (resolve, reject) {
-      let synth = window.speechSynthesis;
-      let id: any;
+  const abortListening = () => SpeechRecognition.abortListening();
+  const stopListening = () => SpeechRecognition.stopListening();
+  // function setSpeech() {
+  //   return new Promise(function (resolve, reject) {
+  //     let synth = window.speechSynthesis;
+  //     let id: any;
 
-      id = setInterval(() => {
-        if (synth.getVoices().length !== 0) {
-          resolve(synth.getVoices());
-          clearInterval(id);
-        }
-      }, 10);
-    });
-  }
+  //     id = setInterval(() => {
+  //       if (synth.getVoices().length !== 0) {
+  //         resolve(synth.getVoices());
+  //         clearInterval(id);
+  //       }
+  //     }, 10);
+  //   });
+  // }
 
-  function getSpeeches() {
-    let s = setSpeech();
-    s.then((voices: any) => {
-      let speakData = new window.SpeechSynthesisUtterance();
-      speakData.volume = 1;
-      speakData.rate = 1;
-      speakData.pitch = 2;
-      speakData.lang = 'en';
-      speakData.text = 'Welcome to Meet';
-      speakData.voice = voices[0];
-      window.speechSynthesis.speak(speakData);
-    });
-  }
+  // function getSpeeches() {
+  //   let s = setSpeech();
+  //   s.then((voices: any) => {
+  //     let speakData = new window.SpeechSynthesisUtterance();
+  //     speakData.volume = 1;
+  //     speakData.rate = 1;
+  //     speakData.pitch = 2;
+  //     speakData.lang = 'en';
+  //     speakData.text = 'Welcome to Meet';
+  //     speakData.voice = voices[0];
+  //     window.speechSynthesis.speak(speakData);
+  //   });
+  // }
 
-  function speak() {}
+  // function speak() {}
 
   useEffect(() => {
-    console.log(finalTranscript);
+    if (finalTranscript) {
+      console.log(finalTranscript);
+      const req: SOCKETREQUEST = {
+        userId: user?.id || '',
+        data: {
+          username: user?.firstName,
+          caption: finalTranscript,
+        },
+        meetId: meetId,
+        type: '',
+      };
+      updateCaptions({ ...req.data });
+      // sendSocketRequest(SOCKETEVENTS.SEND_CAPTIONS, req);
+    }
+    resetTranscript();
   }, [finalTranscript]);
 
   useEffect(() => {
     // addError({ status: false, error: { message: 'Temporary Error!' } });
     // addNotification({ message: 'This is sample message!' });
-    startListening();
-    getSpeeches();
-    setTimeout(() => {
-      console.log('Available voices', window.speechSynthesis.getVoices());
-    }, 2000);
+    // getSpeeches();
+    // setTimeout(() => {
+    //   console.log('Available voices', window.speechSynthesis.getVoices());
+    // }, 2000);
     if (location.state) {
       if (location.state.meetVerified) {
         setIsThisMeetVerified(true);
+        // startListening();
       } else {
         navigate(`/meet/__join/`, {
           state: { meetId },
@@ -108,9 +132,14 @@ export default function Meet() {
         state: { meetId },
       });
     }
+
+    return () => {
+      abortListening();
+    };
   }, []);
   useEffect(() => {
     if (user && meetId && isThisMeetVerified) {
+      console.log(user);
       const req: SOCKETREQUEST = {
         userId: user.id,
         meetId: meetId,
@@ -186,8 +215,11 @@ export default function Meet() {
         videoTrack={videoTrack}
         setIsMeetNavShown={setIsMeetNavShown}
         sendFileModal={sendFileModal}
+        stopListening={stopListening}
+        startListening={startListening}
         className="w-full peer-hover/bottomNav:animate-meetnav absolute left-0 bottom-0 h-[70px] meetnavOut"
       />
+      <Captions captions={captions} />
     </div>
   );
 }

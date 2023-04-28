@@ -7,13 +7,14 @@ import YourProfile from './YourProfile';
 export default function SignupHelper() {
   const { whichPart } = useSignup();
   if (whichPart === 0) {
-    return <FacerSetup />;
-  } else if (whichPart === 3) {
+    return <YourProfile />;
+  } else if (whichPart === 2) {
     return <AcceptTCs />;
   } else if (whichPart === 1) {
     return <FacerSetup />;
-  } else if (whichPart === 2) {
-    return <VoiceSetup />;
   }
+  // else if (whichPart === 2) {
+  //   return <VoiceSetup />;
+  // }
   return <></>;
 }

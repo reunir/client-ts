@@ -15,7 +15,8 @@ export default function VerifyImageModal({
   height: number;
 }) {
   const pictureRef = useRef<HTMLCanvasElement>(null);
-  const { updateModalShown, formData } = useSignup();
+  const { updateModalShown, formData, updateFormData, updatePart } =
+    useSignup();
   const { addError } = useOutletContext<any>();
   const { Button, setButtonLoading } = NormalButton();
 
@@ -35,9 +36,13 @@ export default function VerifyImageModal({
     let files: File[] = [];
     pictureRef.current?.toBlob(async (blob) => {
       if (blob) {
-        let file = new File([blob], formData.email + '.jpg', {
-          type: 'image/jpeg',
-        });
+        let file = new File(
+          [blob],
+          formData.email || 'chitwan001@gmail.com' + '.jpg',
+          {
+            type: 'image/jpeg',
+          }
+        );
         files.push(file);
 
         const urls = files.map(async (file) => {
@@ -51,7 +56,7 @@ export default function VerifyImageModal({
             displaySuccessMessage: () => void;
           } = await makeRequest(
             METHOD.POST,
-            'fshare',
+            'fshare/ppupload',
             formData,
             {
               headers: {
@@ -64,7 +69,10 @@ export default function VerifyImageModal({
 
           displaySuccessMessage();
           console.log(response.data?.body);
-          return response.data?.body.url;
+          if (response.success) {
+            updateFormData({ ppUrl: response.data?.body.url });
+            updatePart(2);
+          }
         });
         const gotURLs = await Promise.all(urls);
         console.log(urls);

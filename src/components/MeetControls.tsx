@@ -13,6 +13,7 @@ import {
   LoginBody,
   MEETDATA,
   METHOD,
+  POLL,
   ResponseType,
   WhiteBoardCreateBody,
 } from '../types';
@@ -24,7 +25,7 @@ import { Share, Whiteboard } from '@styled-icons/fluentui-system-regular';
 import { FileUploader } from 'react-drag-drop-files';
 import { CloudUpload, Share as ShareIcon } from '@styled-icons/boxicons-solid';
 import axios from 'axios';
-import { CallEnd } from '@styled-icons/material-rounded';
+import { CallEnd, Poll } from '@styled-icons/material-rounded';
 import ModeSwitcher from './ModeSwitcher';
 import Avatar from './Avatar';
 
@@ -42,6 +43,8 @@ export default function MeetControls({
   sendSocketRequest,
   setSendFileModal,
   sendFileModal,
+  stopListening,
+  startListening,
 }: {
   isChatShown: boolean;
   setIsChatShown: React.Dispatch<React.SetStateAction<boolean>>;
@@ -56,6 +59,8 @@ export default function MeetControls({
   sendSocketRequest: (event: SOCKETEVENTS, data: SOCKETREQUEST) => void;
   setSendFileModal: any;
   sendFileModal: any;
+  stopListening: () => Promise<void>;
+  startListening: () => Promise<void>;
 }) {
   const headerFocusOut = (e: React.BaseSyntheticEvent) => {
     e.currentTarget.classList.add('meetnavOut');
@@ -74,6 +79,7 @@ export default function MeetControls({
   const [loading, setLoading] = useState(false);
 
   const [showFileModal, setShowFileModal] = useState<boolean>(false);
+  const [showPollModal, setShowPollModal] = useState<boolean>(false);
   const [files, setFiles] = useState<any[]>([]);
 
   useEffect(() => {
@@ -136,7 +142,27 @@ export default function MeetControls({
 
     sendSocketRequest(SOCKETEVENTS.RAISE_HAND, req);
   };
-
+  const [pollObject, setPollObject] = useState<POLL>({
+    question: '',
+    answers: [
+      {
+        answer: '',
+        votes: 0,
+      },
+      {
+        answer: '',
+        votes: 0,
+      },
+      {
+        answer: '',
+        votes: 0,
+      },
+      {
+        answer: '',
+        votes: 0,
+      },
+    ],
+  });
   const generateWhiteBoardSession = async () => {
     setOptionsModal(false);
     const data = {
@@ -187,6 +213,23 @@ export default function MeetControls({
       );
     }
   };
+  const handleCreatePoll = () => {
+    console.log(pollObject);
+    const data: SOCKETREQUEST = {
+      meetId: meetData.meetId,
+      data: {
+        userId: user?.id || '',
+        userName: user?.firstName + ' ' + user?.lastName,
+        userEmail: user?.email,
+        question: pollObject.question,
+        answers: pollObject.answers,
+      },
+      userId: user?.id || '',
+      type: '',
+    };
+    sendSocketRequest(SOCKETEVENTS.POLL_SHARED, data);
+    setShowPollModal(false);
+  };
   return (
     <>
       <div
@@ -200,7 +243,14 @@ export default function MeetControls({
           </div>
           <div className="grid place-self-center grid-cols-[auto_auto_auto_auto_auto] gap-[10px]">
             <button
-              onClick={toggleAudio}
+              onClick={() => {
+                toggleAudio();
+                if (audioTrack) {
+                  stopListening();
+                } else {
+                  startListening();
+                }
+              }}
               className={`grid cursor-pointer place-content-center place-self-center w-[50px] h-[50px] rounded-full ${
                 audioTrack
                   ? 'bg-[#202124] hover:bg-[#3D4143] text-white'
@@ -262,12 +312,12 @@ export default function MeetControls({
           <div className="grid bg-gray-300 pl-[10px] py-[10px]">Tools</div>
           <div
             className={`hover:bg-gray-200 grid gap-[4px] ${
-              meetData.admin !== user?.id
-                ? 'bg-gray-300'
-                : 'bg-gray-100 cursor-pointer'
+              meetData.admin === user?.id
+                ? 'bg-gray-100 cursor-pointer'
+                : 'bg-gray-300'
             } p-[10px] grid-cols-[auto_auto_1fr]`}
             onClick={
-              meetData.admin !== user?.id
+              meetData.admin === user?.id
                 ? () => {
                     generateWhiteBoardSession();
                   }
@@ -300,17 +350,17 @@ export default function MeetControls({
           </div>
           <div
             onClick={
-              meetData.admin !== user?.id
+              meetData.admin === user?.id
                 ? () => {
                     setShowFileModal(true);
                     setOptionsModal(false);
                   }
                 : () => {}
             }
-            className={`hover:bg-gray-200 grid gap-[4px] ${
-              meetData.admin !== user?.id
-                ? 'bg-gray-300'
-                : 'bg-gray-100 cursor-pointer'
+            className={`hover:bg-gray-200 grid grid-cols-[auto_auto_1fr] gap-[4px] ${
+              meetData.admin === user?.id
+                ? 'bg-gray-100 cursor-pointer'
+                : 'bg-gray-300'
             } p-[10px]`}
           >
             {loading ? (
@@ -449,6 +499,195 @@ export default function MeetControls({
             <div className="grid place-content-center" onClick={raiseHand}>
               Raise hand
             </div>
+          </div>
+          <div
+            onClick={
+              meetData.admin === user?.id
+                ? () => {
+                    setShowPollModal(true);
+                  }
+                : () => {}
+            }
+            className={`hover:bg-gray-200 grid grid-cols-[auto_auto_1fr] gap-[4px] ${
+              meetData.admin === user?.id
+                ? 'bg-gray-100 cursor-pointer'
+                : 'bg-gray-300'
+            } p-[10px]`}
+          >
+            <div className="text-black">
+              <Poll width={30} />
+            </div>
+            <div className="grid place-content-center">Create new poll</div>
+            {showPollModal == true && (
+              <Transition.Root show={showPollModal} as={Fragment}>
+                <Dialog
+                  as="div"
+                  className="relative z-10"
+                  onClose={setShowFileModal}
+                >
+                  <Transition.Child
+                    as={Fragment}
+                    enter="ease-out duration-300"
+                    enterFrom="opacity-0"
+                    enterTo="opacity-100"
+                    leave="ease-in duration-200"
+                    leaveFrom="opacity-100"
+                    leaveTo="opacity-0"
+                  >
+                    <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+                  </Transition.Child>
+
+                  <div className="fixed inset-0 z-10 overflow-y-auto">
+                    <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                      <Transition.Child
+                        as={Fragment}
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                        enterTo="opacity-100 translate-y-0 sm:scale-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+                        leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                      >
+                        <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                          <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                            <div className="sm:flex sm:items-start">
+                              <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10 ">
+                                {/* <ExclamationTriangleIcon className="h-6 w-6 text-red-600" aria-hidden="true" /> */}
+                                <Poll
+                                  color="gray"
+                                  height={'20px'}
+                                  width={'20px'}
+                                />
+                              </div>
+                              <div className="mt-3 w-full text-center sm:mt-0 sm:ml-4 sm:text-left">
+                                <Dialog.Title
+                                  as="h3"
+                                  className="text-base font-semibold leading-6 text-gray-900"
+                                >
+                                  Create a poll
+                                </Dialog.Title>
+                                <div className="mt-2">
+                                  <p className="text-sm text-gray-500 mb-2">
+                                    Set a question and 4 options.
+                                  </p>
+                                  <div className="grid grid-flow-row gap-[10px] w-full p-[20px]">
+                                    <div className="grid text-black font-semibold">
+                                      Question
+                                    </div>
+                                    <div className="grid ml-[5px]">
+                                      <input
+                                        type="text"
+                                        onChange={(e) => {
+                                          setPollObject({
+                                            ...pollObject,
+                                            question: e.target.value,
+                                          });
+                                        }}
+                                        placeholder="Enter a question"
+                                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                      />
+                                    </div>
+                                    <div className="grid text-black font-semibold">
+                                      Options
+                                    </div>
+                                    <div className="grid grid-flow-row gap-[5px] ml-[5px]">
+                                      <div>
+                                        <input
+                                          type="text"
+                                          onChange={(e) => {
+                                            const oldAnswers =
+                                              pollObject.answers;
+                                            oldAnswers[0].answer =
+                                              e.target.value;
+                                            setPollObject({
+                                              ...pollObject,
+                                              answers: [...oldAnswers],
+                                            });
+                                          }}
+                                          placeholder="1st Option"
+                                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                        />
+                                      </div>
+                                      <div>
+                                        <input
+                                          type="text"
+                                          onChange={(e) => {
+                                            const oldAnswers =
+                                              pollObject.answers;
+                                            oldAnswers[1].answer =
+                                              e.target.value;
+                                            setPollObject({
+                                              ...pollObject,
+                                              answers: [...oldAnswers],
+                                            });
+                                          }}
+                                          placeholder="2nd Option"
+                                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                        />
+                                      </div>
+                                      <div>
+                                        <input
+                                          type="text"
+                                          onChange={(e) => {
+                                            const oldAnswers =
+                                              pollObject.answers;
+                                            oldAnswers[2].answer =
+                                              e.target.value;
+                                            setPollObject({
+                                              ...pollObject,
+                                              answers: [...oldAnswers],
+                                            });
+                                          }}
+                                          placeholder="3rd Option"
+                                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                        />
+                                      </div>
+                                      <div>
+                                        <input
+                                          type="text"
+                                          onChange={(e) => {
+                                            const oldAnswers =
+                                              pollObject.answers;
+                                            oldAnswers[3].answer =
+                                              e.target.value;
+                                            setPollObject({
+                                              ...pollObject,
+                                              answers: [...oldAnswers],
+                                            });
+                                          }}
+                                          placeholder="4th Option"
+                                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                            <button
+                              type="button"
+                              className="inline-flex w-full justify-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto"
+                              onClick={handleCreatePoll}
+                            >
+                              Create Poll
+                            </button>
+                            <button
+                              type="button"
+                              className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                              onClick={() => setShowPollModal(false)}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </Dialog.Panel>
+                      </Transition.Child>
+                    </div>
+                  </div>
+                </Dialog>
+              </Transition.Root>
+            )}
           </div>
         </div>
       ) : (

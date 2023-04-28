@@ -6,7 +6,8 @@ export interface userInterface {
     stripe: string,
     backgroundColor: string,
     role: string,
-    id: string
+    id: string,
+    preferredLanguage: string
 }
 export type userType = userInterface | null;
 

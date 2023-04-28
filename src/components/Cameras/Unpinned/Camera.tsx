@@ -1,5 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import AudioVisualizer from '../../AudioVisualizer';
+import {
+  Camera as Cam,
+  Mic,
+  CameraOff,
+  Pin,
+} from '@styled-icons/fluentui-system-filled';
+import { useOutletContext } from 'react-router';
+import { SOCKETEVENTS, SOCKETREQUEST } from '../../../types/Socket';
 export default function Camera({
   videoRenderRef,
   mediaStream,
@@ -17,6 +25,7 @@ export default function Camera({
   const [windowSize, setWindowSize] = useState([0, 0]);
   const [initialRender, setInitialRender] = useState(false);
   const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
+  const { meetData, sendSocketRequest } = useOutletContext<any>();
   const [videoTrack, setVideoTrack] = useState(
     mediaStream?.getTracks().find((track) => track.kind === 'video')?.enabled
       ? true
@@ -43,7 +52,17 @@ export default function Camera({
       videoRef.current.pause();
     }
   }
-
+  const turnOtherMicOn = () => {
+    const req: SOCKETREQUEST = {
+      data: {
+        to: id,
+      },
+      userId: '',
+      meetId: meetData.id,
+      type: '',
+    };
+    sendSocketRequest(SOCKETEVENTS.REQUEST_TURN_MIC_ON, req);
+  };
   useEffect(() => {
     if (videoRenderRef.current) {
       const boundingRect = videoRenderRef.current.getBoundingClientRect();
@@ -100,7 +119,7 @@ export default function Camera({
               ?.enabled
               ? 'block'
               : 'hidden'
-          } rounded-md relative overflow-hidden ${
+          } rounded-md peer cursor-pointer relative overflow-hidden ${
             ifSpeaking ? 'border-[rgb(138,180,248)] border-[3px]' : ''
           }`}
         >
@@ -134,6 +153,19 @@ export default function Camera({
           audioTrack={audioTrack}
           stream={videoStream}
         />
+        <div className="absolute bg-gray-700/80 cursor-pointer top-0 left-0 w-[250px] h-[189px] hover:grid hidden peer-hover:grid">
+          <div className="grid gap-[15px] text-gray-200 rounded-[50%] grid-flow-col place-self-center w-fit h-fit px-[10px]">
+            <div onClick={turnOtherMicOn} className="grid">
+              <Mic width={25} />
+            </div>
+            <div className="grid">
+              <Pin width={25} />
+            </div>
+            <div className="grid">
+              {videoTrack ? <Cam width={25} /> : <CameraOff width={25} />}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

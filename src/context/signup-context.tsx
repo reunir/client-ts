@@ -31,7 +31,9 @@ const formDefaultData: SignupObject = {
   seed: '',
   stripe: '',
   backgroundColor: '',
+  preferredLanguage: '',
   isEmailVerified: false,
+  ppUrl: '',
 };
 
 const signupContextDefaultValues: signupContextType = {
@@ -57,7 +59,6 @@ function SignupProvider(props: AppProp) {
   const partTitles = [
     'Your Profile',
     'Setup face authentication',
-    'Setup voice authentication',
     'Accept terms and conditions',
   ];
   const [formData, setFormData] = useState<SignupObject>(formDefaultData);
@@ -72,13 +73,13 @@ function SignupProvider(props: AppProp) {
   const [whichPart, setwhichPart] = useState<number>(0);
   const [partTitle, setPartTitle] = useState<string>(partTitles[whichPart]);
   const [percentageCompleted, setpercentageCompleted] = useState<number>(
-    Math.floor((whichPart / 4) * 100)
+    Math.floor((whichPart / 3) * 100)
   );
   const [isNextDisabled, setisNextDisabled] = useState<boolean>(true);
   const updatePart = (part: number) => {
     setwhichPart(part);
     setPartTitle(partTitles[part]);
-    setpercentageCompleted(Math.floor((part / 4) * 100));
+    setpercentageCompleted(Math.floor((part / 3) * 100));
   };
   const updateFormData = (updatedObject: ModifiedSignupObject) => {
     setFormData({ ...formData, ...updatedObject });

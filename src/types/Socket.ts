@@ -26,7 +26,12 @@ export enum SOCKETEVENTS {
     USER_HAS_JOINED_SUCCESSFULLY = "user_has_joined_successfully",
     I_JOINED_SUCCESSFULLY = "i_joined_successfully",
     RAISE_HAND = "raise_hand",
-    HAND_RAISED = "hand_raised"
+    HAND_RAISED = "hand_raised",
+    POLL_SHARED = 'poll_shared',
+    POLL_RECEIVED = 'poll_received',
+    VIOLATION = "violation",
+    REQUEST_TURN_MIC_ON = "request_turn_mic_on",
+    ADMIN_SAY_TURN_MIC_ON = "admin_say_turn_mic_on"
 }
 export interface SOCKETREQ {
     data: any,
