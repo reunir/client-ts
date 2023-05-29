@@ -52,15 +52,9 @@ export default function NewMeetForm({
     });
   };
   return (
-    <div className="grid">
-      <div className="grid grid-rows-[1fr_5fr] w-[75%] rounded h-[80%] place-self-center">
-        <div className="grid place-content-center">
-          <img
-            src="https://readme-typing-svg.herokuapp.com?font=Poppins&weight=500&size=60&duration=2000&pause=500&color=8A44FF&center=true&vCenter=true&width=600&height=80&lines=Welcome;Bienvenu;Willkommen;%E0%A6%B8%E0%A7%8D%E0%A6%AC%E0%A6%BE%E0%A6%97%E0%A6%A4;%E0%A4%B8%E0%A5%8D%E0%A4%B5%E0%A4%BE%E0%A4%97%E0%A4%A4;%E6%AD%A1%E8%BF%8E;Welkom;%E0%AA%B8%E0%AB%8D%E0%AA%B5%E0%AA%BE%E0%AA%97%E0%AA%A4+%E0%AA%9B%E0%AB%87;+%E3%81%84%E3%82%89%E3%81%A3%E3%81%97%E3%82%83%E3%81%84%E3%81%BE%E3%81%9B;%E0%B2%B8%E0%B3%8D%E0%B2%B5%E0%B2%BE%E0%B2%97%E0%B2%A4;+%E0%A4%B8%E0%A5%8D%E0%A4%B5%E0%A4%BE%E0%A4%97%E0%A4%A4+%E0%A4%86%E0%A4%B9%E0%A5%87;%E0%A8%B8%E0%A9%81%E0%A8%86%E0%A8%97%E0%A8%A4+%E0%A8%B9%E0%A9%88;%D0%94%D0%BE%D0%B1%D1%80%D0%BE+%D0%BF%D0%BE%D0%B6%D0%B0%D0%BB%D0%BE%D0%B2%D0%B0%D1%82%D1%8C;%E0%A4%B8%E0%A5%8D%E0%A4%B5%E0%A4%BE%E0%A4%97%E0%A4%A4%E0%A4%AE%E0%A5%8D%E2%80%8C"
-            alt="Typing SVG"
-          />
-        </div>
-        <div className="grid grid-rows-[1fr_4fr_4fr] border-[2px] rounded-md bg-gray-100 p-[10px]">
+    <div className="grid bg-[#3D4143]">
+      <div className="grid w-[75%] rounded h-[80%] place-self-center">
+        <div className="grid grid-rows-[1fr_4fr_4fr] rounded-md bg-gray-50 p-[10px]">
           <div className="grid place-content-center font-bold text-lg text-gray-800">
             Start a new meeting
           </div>

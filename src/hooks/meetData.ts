@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/auth-context";
-import { MEETDATA, SCREENMEDIA, STREAMS, USERSTREAM } from "../types";
+import { CAPTION, CAPTIONS, MEETDATA, SCREENMEDIA, STREAMS, USERSTREAM } from "../types";
 
 export default function useMeetData() {
     const tempMeetData: MEETDATA = {
@@ -16,6 +16,7 @@ export default function useMeetData() {
         fileHistory: null
     }
     const [meetData, setMeetData] = useState<MEETDATA>(tempMeetData);
+    const [captions, setCaptions] = useState<CAPTIONS>(null)
     const tempStreams: STREAMS = {
         userStreams: [],
         screenMedias: [],
@@ -42,6 +43,48 @@ export default function useMeetData() {
             return { pinnedIndex, pinnedStream };
         }
     }
+
+    const updateCaptions = (newCaption: CAPTION) => {
+
+        let index = -1
+        const ifPresent = captions?.find((val: CAPTION, i) => {
+            if (val.username === newCaption.username) {
+                index = i
+                return true
+            }
+            return false
+        })
+        console.log(ifPresent);
+
+        if (ifPresent) {
+            if (captions) {
+                let captionObj: CAPTION = {
+                    username: captions[index].username,
+                    caption: captions[index].caption + " " + newCaption.caption
+                }
+                const oldCaptions = captions
+                oldCaptions[index] = captionObj
+                setCaptions([...oldCaptions])
+            }
+        } else {
+            if (captions) {
+                let captionObj: CAPTION = {
+                    username: newCaption.username,
+                    caption: newCaption.caption
+                }
+                const newCaptions = captions
+                newCaptions.push(captionObj)
+                setCaptions([...newCaptions])
+            } else {
+                let captionObj: CAPTION = {
+                    username: newCaption.username,
+                    caption: newCaption.caption
+                }
+                setCaptions([captionObj])
+            }
+        }
+    }
+
     const getPinnedUsers = () => {
         if (streams.userStreams) {
             let pinnedStream: USERSTREAM | undefined;
@@ -169,6 +212,8 @@ export default function useMeetData() {
         deleteScreenMedia,
         deleteUserStream,
         setMeetData,
-        clearPinnedStreams
+        clearPinnedStreams,
+        updateCaptions,
+        captions
     }
 }

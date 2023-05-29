@@ -42,8 +42,8 @@ export default function DateTime() {
     }, 60000);
   }, []);
   return (
-    <div className="grid place-content-center text-lg tracking-wide text-gray-700">
-      {time}•{date}
+    <div className="grid place-content-center text-md tracking-wide text-gray-200">
+      {time} | {date}
     </div>
   );
 }

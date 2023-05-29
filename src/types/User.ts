@@ -6,7 +6,8 @@ export interface userInterface {
     stripe: string,
     backgroundColor: string,
     role: string,
-    id: string
+    id: string,
+    preferredLanguage: string
 }
 export type userType = userInterface | null;
 
@@ -22,6 +23,14 @@ export const SCREEN_CAPTURE_OPTIONS: StreamOptions = {
 
 export const CAPTURE_OPTIONS: StreamOptions = {
     audio: true,
+    video: true,
+};
+export const AUDIO_CAPTURE_OPTIONS: StreamOptions = {
+    audio: true,
+    video: false,
+};
+export const VIDEO_CAPTURE_OPTIONS: StreamOptions = {
+    audio: false,
     video: true,
 };
 

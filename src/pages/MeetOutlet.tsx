@@ -47,6 +47,8 @@ export default function MeetOutlet() {
     deleteScreenMedia,
     deleteUserStream,
     clearPinnedStreams,
+    captions,
+    updateCaptions,
   } = useMeetData();
   const { isSocketConnected, sendSocketRequest } = useMeetSocket(
     socket,
@@ -58,7 +60,10 @@ export default function MeetOutlet() {
     addNewUserStream,
     setMeetData,
     clearPinnedStreams,
-    enableUserStream
+    enableUserStream,
+    captions,
+    updateCaptions,
+    toggleAudio
   );
 
   const { pinnedStream, unpinnedStreams } = useHandlePinUnpin(streams);
@@ -130,21 +135,21 @@ export default function MeetOutlet() {
     }
   }, [screenStream]);
 
-  useEffect(() => {
-    return function cleanup() {
-      console.log('cleanup');
-      if (user && meetId) {
-        const req: SOCKETREQUEST = {
-          userId: user.id,
-          meetId: meetId,
-          type: '',
-          data: '',
-          peerId: peerId,
-        };
-        sendSocketRequest(SOCKETEVENTS.LEAVE_ROOM, req);
-      }
-    };
-  }, []);
+  // useEffect(() => {
+  //   return function cleanup() {
+  //     console.log('cleanup');
+  //     if (user && meetId) {
+  //       const req: SOCKETREQUEST = {
+  //         userId: user.id,
+  //         meetId: meetId,
+  //         type: '',
+  //         data: '',
+  //         peerId: peerId,
+  //       };
+  //       sendSocketRequest(SOCKETEVENTS.LEAVE_ROOM, req);
+  //     }
+  //   };
+  // }, []);
 
   return (
     <>
@@ -173,6 +178,8 @@ export default function MeetOutlet() {
           addNewUserStream,
           peerId,
           enableUserStream,
+          captions,
+          updateCaptions,
         }}
       />
     </>

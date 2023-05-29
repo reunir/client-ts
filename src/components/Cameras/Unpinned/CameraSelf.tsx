@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import AudioVisualizer from './AudioVisualizer';
+import AudioVisualizer from '../../AudioVisualizer';
 export default function Camera({
   videoRenderRef,
   mediaStream,
@@ -60,7 +60,6 @@ export default function Camera({
       className={`grid relative self-center`}
       style={{
         width: windowSize[0] + 'px',
-        height: windowSize[1] + 'px',
       }}
     >
       <div

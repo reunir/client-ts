@@ -45,6 +45,7 @@ export default function Login() {
       METHOD.POST,
       'auth/login',
       data,
+      {},
       addError,
       setButtonLoading
     );
@@ -113,6 +114,7 @@ export default function Login() {
                     {
                       token: res.credential,
                     },
+                    {},
                     addError,
                     setButtonLoading
                   );

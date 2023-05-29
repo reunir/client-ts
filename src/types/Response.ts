@@ -7,6 +7,10 @@ export interface LoginBody {
     token: string
 }
 
+export interface FileResponse {
+    url: string
+}
+
 export interface WhiteBoardCreateBody {
     whiteboardId: string
 }

@@ -8,7 +8,7 @@ import {
 import parse from 'html-react-parser';
 import { ArrowReply } from '@styled-icons/fluentui-system-filled';
 import { SOCKETEVENTS, SOCKETREQUEST } from '../types/Socket';
-import { AChat, userType } from '../types';
+import { AChat, POLLANSWER, userType } from '../types';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/auth-context';
 import { Send } from '@styled-icons/bootstrap';
@@ -120,7 +120,7 @@ export default function Chat({
     setChats(chatData.allChats);
   }, [chatData]);
   return (
-    <div className="w-[400px] relative grid grid-rows-[auto_1fr_auto] h-[750px] self-center border rounded-md bg-white border-gray-400">
+    <div className="w-[400px] relative z-[10] grid grid-rows-[auto_1fr_auto] h-[750px] self-center border rounded-md bg-white border-gray-400">
       <div className="w-full h-[80px] grid top-0 left-0">
         <div className="grid w-auto h-auto m-[10px]">
           <div className="grid font-semibold text-xl self-center pl-[20px] text-gray-800">
@@ -141,12 +141,14 @@ export default function Chat({
       >
         <div className="h-fit relative self-end pr-[10px]">
           <div className="grid bottom-0 left-0 w-full">
-            {chats != null && chats.length != 0
+            {chats != null
               ? chats.map((chat, id) =>
                   chat.senderEmail !== me?.email ? (
                     <div
                       key={id}
-                      className={`grid group grid-cols-[30px_auto_auto] gap-[10px] w-full place-content-start ${
+                      className={`grid group grid-cols-[30px_auto_auto] gap-[10px] ${
+                        chat.type === 'poll' ? 'w-[200px]' : 'w-full'
+                      } place-content-start ${
                         id === 0
                           ? 'pt-0'
                           : chats[id - 1].senderEmail === chat.senderEmail
@@ -163,7 +165,7 @@ export default function Chat({
                             : 'grid'
                         }`}
                       ></div>
-                      <div className="break-words bg-slate-300 select-text dark:bg-gray-900 px-[10px] py-[5px] rounded-xl rounded-bl-none grid text-left text-gray-900 dark:text-slate-300 w-fit max-w-[250px]">
+                      <div className="break-words bg-slate-300 select-text dark:bg-gray-900 px-[10px] py-[5px] rounded-xl rounded-bl-none grid text-left text-gray-900 dark:text-slate-300 w-full max-w-[250px]">
                         {chat.inReplyTo === -1 ? (
                           ''
                         ) : (
@@ -205,6 +207,46 @@ export default function Chat({
                                 {chat.text}
                               </div>
                             </Link>
+                          </div>
+                        ) : chat.type === 'violation' ? (
+                          <div className="text-red-600">{chat.text}</div>
+                        ) : chat.type === 'poll' ? (
+                          <div className="flex flex-col justify-center items-center">
+                            <div className="bg-white rounded-md pb-2 shadow-lg">
+                              <p className="bg-teal-700 px-4 py-3 text-white font-bold rounded-t-md">
+                                {chat.text.question}
+                              </p>
+                              <div className="flex flex-col min-w-[80px] w-full gap-3 pt-3 pb-2 px-2 relative">
+                                {chat.text.answers.map(
+                                  (answer: POLLANSWER, id: number) => (
+                                    <div
+                                      key={id}
+                                      className="relative w-full h-8"
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        id={'answer-' + id}
+                                        className="appearance-none rounded-lg bg-gray-100 cursor-pointer h-full w-full 
+                    checked:bg-teal-400 transition-all duration-200  checked:hover:bg-teal-400 hover:bg-gray-200   peer"
+                                      ></input>
+                                      <label
+                                        htmlFor={'answer-' + id}
+                                        className="absolute top-[50%] left-3 text-gray-400   -translate-y-[50%]
+                     peer-checked:text-gray-100 transition-all duration-200 select-none
+                "
+                                      >
+                                        {answer.answer}
+                                      </label>
+                                    </div>
+                                  )
+                                )}
+                              </div>
+                              <div className="w-full flex flex-row justify-end px-2 pt-1">
+                                <button className="bg-emerald-500 w-full rounded-md py-2 text-white font-bold hover:bg-emerald-600 transition-all duration-300">
+                                  Submit
+                                </button>
+                              </div>
+                            </div>
                           </div>
                         ) : (
                           <>{chat.text}</>

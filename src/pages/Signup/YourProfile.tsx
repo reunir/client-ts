@@ -5,6 +5,7 @@ import parse from 'html-react-parser';
 import { useForm } from 'react-hook-form';
 import { generateNewAvatar } from '../../utils/generateAvatar';
 import FormInfo from '../../components/FormInfo';
+import { languages } from '../../constants';
 import {
   LoginBody,
   METHOD,
@@ -109,6 +110,7 @@ export default function YourProfile() {
         email: formData.email,
         type: TEMPLATETYPE.VERIFY,
       },
+      {},
       addError,
       setButtonLoading
     );
@@ -133,6 +135,7 @@ export default function YourProfile() {
         otp: userOtp,
         check: formData.email,
       },
+      {},
       addError,
       sendOTPButtonLoading
     );
@@ -141,6 +144,10 @@ export default function YourProfile() {
       updateFormData({ isEmailVerified: true });
       setOtpURI('');
     }
+  };
+
+  const addLanguage = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    updateFormData({ preferredLanguage: e.target.value });
   };
 
   return (
@@ -359,6 +366,24 @@ export default function YourProfile() {
               <div className="text-sm text-black  font-medium">
                 Show Password
               </div>
+            </div>
+          </div>
+          <div className="grid grid-flow-col mt-[10px] mb-[10px]">
+            <div className="grid grid-rows-[auto_1fr] gap-[7px]  place-self-start">
+              <div className="grid text-gray-700 font-bold text-sm">
+                Preferred Language
+              </div>
+              <select
+                onChange={addLanguage}
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              >
+                <option selected disabled>
+                  Choose a language
+                </option>
+                {languages.map((lang) => (
+                  <option value={lang.code}>{lang.Language}</option>
+                ))}
+              </select>
             </div>
           </div>
         </div>

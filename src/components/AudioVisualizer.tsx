@@ -49,10 +49,10 @@ export default function AudioVisualizer({
         analyser.getByteFrequencyData(data);
         for (let i = 0; i < bufferLength; i++) {
           let item = data[i];
-          item = item > 150 ? item / 1.5 : item;
+          item = item > 150 ? item / 1.5 : item * 1.25;
           elements[i].style.transform = `rotateZ(${
             i * (360 / bufferLength)
-          }deg) translate(-50%,${clamp(item, 100, 150)}px)`;
+          }deg) translate(-50%,${clamp(item, 100, 110)}px)`;
         }
         let isspeaking = false;
         for (let i in data) {
@@ -73,10 +73,11 @@ export default function AudioVisualizer({
   }, [stream]);
   return (
     <div
-      ref={analyserCanvas}
-      className={`w-[250px] h-[250px] place-self-center relative rotate-180 ${className}`}
+      className={`relative place-self-center grid w-[250px] h-[250px] rotate-180 ${className}`}
     >
-      <Avatar className="grid rotate-180 absolute top-0 left-0 z-[2] rounded-full w-[250px] h-[250px] overflow-hidden" />
+      <div ref={analyserCanvas} className={`parent-visualizer`}></div>
+      <div className="grid border-[20px] blur-[4px] border-white absolute top-0 left-0 z-[2] rounded-full w-[250px] h-[250px] overflow-hidden"></div>
+      <Avatar className="rotate-180 absolute top-0 left-0 z-[3] w-[250px] h-[250px] overflow-hidden rounded-full !blur-none" />
     </div>
   );
 }

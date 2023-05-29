@@ -9,7 +9,9 @@ export type SignupObject = {
     stripe: string;
     backgroundColor: string;
     phone: string,
-    isEmailVerified: boolean
+    isEmailVerified: boolean;
+    preferredLanguage: string;
+    ppUrl: string
 };
 
 export type ChatObject = {
@@ -20,7 +22,7 @@ export type AChat = {
     senderEmail: string,
     inReplyTo: number,
     senderName: string,
-    text: string,
+    text: any,
     timeAndDate: string
     language: string,
     reacts: [],
@@ -70,6 +72,14 @@ export type USERSTREAM = {
 export type USERSTREAMS = USERSTREAM[]
 export type SCREENMEDIAS = SCREENMEDIA[]
 
+export type CAPTION = {
+    username: string;
+    caption: string;
+};
+export type CAPTIONS = CAPTION[] | null
+export type VIOLATIONBODY = {
+    chat: string
+}
 export type MEETDATA = {
     participants: {
         length: number,
@@ -94,7 +104,17 @@ export type ModifiedSignupObject = {
     password?: string;
     seed?: string;
     stripe?: string;
-    backgroundColor?: string
-    isEmailVerified?: boolean
-    phone?: string,
+    backgroundColor?: string;
+    isEmailVerified?: boolean;
+    phone?: string;
+    preferredLanguage?: string,
+    ppUrl?: string
+}
+export type POLLANSWER = {
+    answer: string,
+    votes: number
+}
+export type POLL = {
+    question: string,
+    answers: POLLANSWER[]
 }
