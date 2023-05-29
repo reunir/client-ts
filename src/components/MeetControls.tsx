@@ -5,7 +5,7 @@ import {
   Options,
   ShareScreenStart,
 } from '@styled-icons/fluentui-system-filled';
-import { Mic, MicOff } from '@styled-icons/ionicons-sharp';
+import { Mic, MicOff, Notifications } from '@styled-icons/ionicons-sharp';
 import { useEffect, useState, Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { useOutletContext } from 'react-router-dom';
@@ -22,9 +22,13 @@ import { useAuth } from '../context/auth-context';
 import { SOCKETEVENTS, SOCKETREQUEST } from '../types/Socket';
 import { Share, Whiteboard } from '@styled-icons/fluentui-system-regular';
 import { FileUploader } from 'react-drag-drop-files';
-import { CloudUpload, Share as ShareIcon } from '@styled-icons/boxicons-solid';
+import {
+  CloudUpload,
+  Notification,
+  Share as ShareIcon,
+} from '@styled-icons/boxicons-solid';
 import axios from 'axios';
-import { CallEnd } from '@styled-icons/material-rounded';
+import { CallEnd, NotificationsActive } from '@styled-icons/material-rounded';
 import ModeSwitcher from './ModeSwitcher';
 import Avatar from './Avatar';
 
@@ -238,6 +242,9 @@ export default function MeetControls({
           </div>
           <div className="absolute w-fit grid grid-cols-[auto_auto_auto] gap-[30px] h-full right-[30px]">
             <div className="grid place-content-center place-self-center">
+              <Notification width={25} color="#fff" />
+            </div>
+            <div className="grid place-content-center place-self-center">
               <button
                 onClick={() => setIsChatShown(!isChatShown)}
                 className="grid cursor-pointer bg-[#202124] hover:bg-[#3D4143] place-content-center place-self-center w-[50px] h-[50px] rounded-full text-white"
@@ -245,9 +252,9 @@ export default function MeetControls({
                 <ChatLeftTextFill width={20} />
               </button>
             </div>
-            <div className="grid place-content-center place-self-center">
+            {/* <div className="grid place-content-center place-self-center">
               <ModeSwitcher />
-            </div>
+            </div> */}
             <div className="grid lg:w-[60px] w-[40px] cursor-pointer rounded-full place-self-center overflow-hidden">
               <Avatar className="" />
             </div>
@@ -299,20 +306,21 @@ export default function MeetControls({
           </div>
           <div
             onClick={
-              meetData.admin !== user?.id
-                ? () => {
-                    setShowFileModal(true);
-                    setOptionsModal(false);
-                  }
-                : () => {}
+              // meetData.admin !== user?.id
+              // ?
+              () => {
+                setShowFileModal(true);
+                setOptionsModal(false);
+              }
+              // : () => {}
             }
             className={`hover:bg-gray-200 grid gap-[4px] ${
               meetData.admin !== user?.id
                 ? 'bg-gray-300'
-                : 'bg-gray-100 cursor-pointer'
+                : 'bg-gray-100 cursor-pointer grid-cols-[auto_auto_1fr]'
             } p-[10px]`}
           >
-            {loading ? (
+            {/* {loading ? (
               <div className="grid w-[20px] h-[20px]">
                 <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
                   <circle
@@ -332,7 +340,7 @@ export default function MeetControls({
               </div>
             ) : (
               ''
-            )}
+            )} */}
             <Share width={30} />
             <div className="grid place-content-center">Drop file</div>
             {showFileModal == true && (

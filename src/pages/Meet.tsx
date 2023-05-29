@@ -52,6 +52,8 @@ export default function Meet() {
   const startListening = () =>
     SpeechRecognition.startListening({ continuous: true });
 
+  const stopListening = () => SpeechRecognition.abortListening();
+
   function setSpeech() {
     return new Promise(function (resolve, reject) {
       let synth = window.speechSynthesis;
@@ -89,14 +91,11 @@ export default function Meet() {
   useEffect(() => {
     // addError({ status: false, error: { message: 'Temporary Error!' } });
     // addNotification({ message: 'This is sample message!' });
-    startListening();
-    getSpeeches();
-    setTimeout(() => {
-      console.log('Available voices', window.speechSynthesis.getVoices());
-    }, 2000);
+    // getSpeeches();
     if (location.state) {
       if (location.state.meetVerified) {
         setIsThisMeetVerified(true);
+        startListening();
       } else {
         navigate(`/meet/__join/`, {
           state: { meetId },
@@ -108,6 +107,10 @@ export default function Meet() {
         state: { meetId },
       });
     }
+
+    return () => {
+      stopListening();
+    };
   }, []);
   useEffect(() => {
     if (user && meetId && isThisMeetVerified) {
